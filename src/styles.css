@@ -5,9 +5,6 @@
 @import "@fontsource/heebo/500.css";
 @import "@fontsource/heebo/700.css";
 @import "@fontsource/heebo/800.css";
-@import "@fontsource/assistant/400.css";
-@import "@fontsource/assistant/600.css";
-@import "@fontsource/assistant/700.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -40,48 +37,38 @@
   --color-success: var(--success);
   --color-page: var(--page);
   --color-panel: var(--panel);
-  --font-sans: "Heebo", "Assistant", system-ui, sans-serif;
+  --font-sans: "Heebo", system-ui, sans-serif;
 }
 
 :root {
   --radius: 0.5rem;
-  --background: oklch(0.985 0.005 80);
-  --foreground: oklch(0.25 0.02 240);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.25 0.02 240);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.25 0.02 240);
-  --primary: oklch(0.68 0.11 195);
-  --primary-foreground: oklch(1 0 0);
-  --secondary: oklch(0.96 0.01 200);
-  --secondary-foreground: oklch(0.25 0.02 240);
-  --muted: oklch(0.96 0.005 80);
-  --muted-foreground: oklch(0.5 0.02 240);
-  --accent: oklch(0.96 0.01 200);
-  --accent-foreground: oklch(0.25 0.02 240);
-  --destructive: oklch(0.65 0.2 25);
-  --destructive-foreground: oklch(1 0 0);
-  --border: oklch(0.9 0.01 200);
-  --input: oklch(0.9 0.01 200);
-  --ring: oklch(0.68 0.11 195);
+  --background: #f7f5f2;
+  --foreground: #222222;
+  --card: #ffffff;
+  --card-foreground: #222222;
+  --popover: #ffffff;
+  --popover-foreground: #222222;
+  --primary: #18b5b6;
+  --primary-foreground: #ffffff;
+  --secondary: #eef6f6;
+  --secondary-foreground: #222222;
+  --muted: #f0eeea;
+  --muted-foreground: #666666;
+  --accent: #eef6f6;
+  --accent-foreground: #222222;
+  --destructive: #ff6b57;
+  --destructive-foreground: #ffffff;
+  --border: #e7e7e7;
+  --input: #e7e7e7;
+  --ring: #18b5b6;
 
-  /* Brand */
-  --teal: oklch(0.7 0.105 195);          /* #3FBAB8-ish */
-  --teal-dark: oklch(0.58 0.1 200);
-  --coral: oklch(0.7 0.18 35);           /* warm coral */
-  --coral-dark: oklch(0.6 0.2 30);
-  --success: oklch(0.65 0.16 155);
-  --page: oklch(0.985 0.008 85);         /* warm cream */
-  --panel: oklch(1 0 0);
-}
-
-.dark {
-  --background: oklch(0.18 0.02 240);
-  --foreground: oklch(0.98 0.005 240);
-  --card: oklch(0.22 0.02 240);
-  --card-foreground: oklch(0.98 0.005 240);
-  --border: oklch(1 0 0 / 12%);
-  --input: oklch(1 0 0 / 15%);
+  --teal: #18b5b6;
+  --teal-dark: #149899;
+  --coral: #ff6b57;
+  --coral-dark: #f15a48;
+  --success: #28b463;
+  --page: #f7f5f2;
+  --panel: #ffffff;
 }
 
 @layer base {
