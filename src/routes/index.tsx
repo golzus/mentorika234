@@ -1,10 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
 import {
   Phone, Mail, Pencil, Trash2, Plus, Calendar, Clock, MoreHorizontal,
-  ChevronLeft, Circle, CheckCircle2,
+  ChevronLeft,
 } from "lucide-react";
 import logoMentorika from "@/assets/logo-mentorika.png";
 import logoZahavi from "@/assets/logo-zahavi.png";
+import gaugeSvg from "@/assets/gauge-65.svg";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -33,232 +34,217 @@ const leads = Array.from({ length: 5 }).map(() => ({
 }));
 
 const tasks = [
-  { state: "danger" },
-  { state: "danger" },
-  { state: "success" },
-  { state: "success" },
+  { state: "danger" }, { state: "danger" }, { state: "success" }, { state: "success" },
 ] as const;
 
 const stats = [
-  { label: "מכירות", value: "10", sub: "מכירות יזומות\nמול לקוחות פוטנציאל" },
-  { label: "חשיפה", value: "50", sub: "פרסום אונליין / פרינטים /\nדיגיטליים" },
-  { label: 'שתפ"ם', value: "30", sub: "הפניות ושיתופי פעולה" },
-  { label: "שימור", value: "15", sub: "מתנות ומפגשי שבועיות\nרצון לקוח" },
-  { label: "המלצות", value: "22", sub: "איסוף המלצות מלקוחות\nמרוצים" },
-  { label: "בניית תשתיות", value: "52", sub: "???" },
+  { label: "מכירות", value: "10", sub: "מכירות יזומות\nמול לקוחות פוטנציאליים", color: "#28b463" },
+  { label: "חשיפה", value: "50", sub: "פרסום אונליין / פרינטים /\nדיגיטליים", color: "#28b463" },
+  { label: 'שתפ"ם', value: "30", sub: "הפצות ושיתופי פעולה", color: "#28b463" },
+  { label: "שימור", value: "15", sub: "מתנות ומפגשי שביעות\nרצון לקוח", color: "#ff6b57" },
+  { label: "המלצות", value: "22", sub: "איסוף המלצות מלקוחות\nמרוצים", color: "#ff6b57" },
+  { label: "בניית תשתיות", value: "52", sub: "???", color: "#28b463" },
 ];
 
 function LeadsDashboard() {
   return (
-    <div className="min-h-screen bg-page p-2 sm:p-4 md:p-6 lg:p-8" dir="rtl">
-      <div className="mx-auto flex max-w-[1280px] gap-2 sm:gap-3 md:gap-4">
-        {/* Side nav — RIGHT side in RTL (first child) */}
-        <nav className="sticky top-4 hidden h-fit w-28 shrink-0 flex-col gap-1 self-start rounded-2xl bg-teal py-5 text-white shadow-[0_8px_30px_-12px_rgba(0,0,0,0.2)] md:flex lg:w-32">
-          <div className="px-3 pb-2 text-center text-[11px] font-bold text-white/90">
-            מסך פתיחה
+    <div className="min-h-screen bg-page" dir="rtl">
+      {/* Floating tip - left edge of viewport */}
+      <aside
+        className="fixed left-0 top-6 z-20 w-[75px] bg-coral text-white"
+        style={{ borderRadius: "0 0 12px 12px" }}
+      >
+        <div className="px-2 py-3 text-center">
+          <div className="mb-2 text-[13px] font-bold leading-tight">הטיפ היומי</div>
+          <div className="text-[11px] font-medium leading-tight">
+            עקבי אחרי המספרים - הם מספרים את הסיפור האמיתי
           </div>
-          {sideNav.map((item, i) => {
-            const active = i === 0;
-            return (
-              <button
-                key={item}
-                className={`relative ml-2 rounded-l-lg px-3 py-2 text-right text-[12px] font-semibold transition-all lg:text-[13px] ${
-                  active
-                    ? "bg-panel text-teal-dark shadow-sm"
-                    : "text-white/95 hover:bg-white/10"
-                }`}
-              >
-                {item}
-              </button>
-            );
-          })}
-        </nav>
+        </div>
+      </aside>
 
-        {/* Main panel */}
-        <main className="relative min-w-0 flex-1 overflow-hidden rounded-2xl bg-panel shadow-[0_8px_30px_-12px_rgba(0,0,0,0.15)] ring-1 ring-black/5">
-          {/* Daily tip ribbon — top LEFT */}
-          <aside className="absolute left-0 top-6 z-10 hidden w-11 rounded-r-md bg-coral px-2 py-3 text-[10px] font-bold leading-tight text-white shadow-md lg:block">
-            <div className="text-center">
-              <div className="mb-1 text-[11px]">הטיפ היומי</div>
-              <div className="text-[9px] font-medium leading-snug text-white/95">
-                עקבי אחרי המספרים - הם מספרים את הסיפור האמיתי
+      <div className="mx-auto max-w-[1600px] p-6">
+        <div className="flex gap-5">
+          {/* Main content — LEFT in RTL flow (appears left because nav is first in RTL) */}
+          <main className="min-w-0 flex-1">
+            {/* Header */}
+            <header className="mb-5 flex h-[90px] items-center justify-between">
+              {/* Logo - left */}
+              <div className="flex items-center gap-3">
+                <img src={logoMentorika} alt="מנטוריקה" className="h-16 w-auto" />
               </div>
-            </div>
-          </aside>
+              {/* Greeting - right */}
+              <div className="text-right">
+                <div className="flex items-baseline justify-end gap-3">
+                  <span className="text-[18px] font-medium text-[#666]">יום חמישי 16.04.2026</span>
+                  <h1 className="text-[44px] font-bold leading-none text-[#222]">
+                    שלום ישראלה ישראלי
+                  </h1>
+                </div>
+                <div className="mt-1 text-[13px] font-medium text-coral">
+                  להוסיף פירורי לחם בכל עמוד
+                </div>
+              </div>
+            </header>
 
-          <div className="p-4 md:p-6 lg:p-8 lg:pl-20">
-            <Header />
-
-            {/* Top row: Tasks (left in RTL) + Leads (right in RTL) */}
-            <div className="mt-6 grid grid-cols-1 gap-4 lg:grid-cols-2">
-              <LeadsCard />
+            {/* Top row */}
+            <div className="grid grid-cols-2 gap-5">
               <TasksCard />
+              <LeadsCard />
             </div>
 
-            {/* Mid row */}
-            <div className="mt-4 grid grid-cols-1 gap-4 lg:grid-cols-2">
-              {/* Right column in RTL: revenue + active clients */}
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <RevenueCard />
-                <ActiveClientsCard />
-              </div>
-              {/* Left column in RTL: 2x3 stats */}
-              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                {stats.map((s) => (
-                  <StatCard key={s.label} {...s} />
-                ))}
+            {/* Bottom row */}
+            <div className="mt-5 grid gap-5" style={{ gridTemplateColumns: "1fr 1fr 1fr" }}>
+              <RevenueCard />
+              <ActiveClientsCard />
+              <div className="grid grid-cols-3 gap-2">
+                {stats.map((s) => <StatCard key={s.label} {...s} />)}
               </div>
             </div>
 
-            {/* Footer brand */}
+            {/* Brand */}
             <div className="mt-6 flex justify-end">
-              <img src={logoZahavi} alt="זהבי הסגל" className="h-12 w-auto" />
+              <img src={logoZahavi} alt="זהבי הסגל" className="h-14 w-auto" />
             </div>
-          </div>
-        </main>
-      </div>
+          </main>
 
-      {/* Mobile nav */}
-      <nav className="mt-3 grid grid-cols-4 gap-1 rounded-xl bg-teal p-2 text-white md:hidden">
-        {sideNav.map((item, i) => (
-          <button
-            key={item}
-            className={`rounded-md px-2 py-2 text-center text-[11px] font-semibold ${
-              i === 0 ? "bg-panel text-teal-dark" : "text-white/95"
-            }`}
+          {/* Sidebar — RIGHT (first child in RTL) */}
+          <nav
+            className="sticky top-6 flex h-fit shrink-0 flex-col bg-teal py-4 text-white"
+            style={{ width: 240, borderRadius: 28 }}
           >
-            {item}
-          </button>
-        ))}
-      </nav>
-    </div>
-  );
-}
-
-function Header() {
-  return (
-    <div className="flex flex-wrap-reverse items-start justify-between gap-4">
-      {/* Greeting (left in RTL) */}
-      <div className="text-left">
-        <div className="text-lg font-bold text-foreground md:text-xl">
-          שלום ישראלה ישראלי{" "}
-          <span className="text-xs font-medium text-muted-foreground md:text-sm">
-            יום חמישי 16.04.2026
-          </span>
-        </div>
-        <div className="mt-0.5 text-[11px] font-medium text-coral">
-          להוסיף פירורי לחם בכל עמוד
-        </div>
-      </div>
-
-      {/* Logo (right in RTL) */}
-      <div className="flex items-center gap-2">
-        <img src={logoMentorika} alt="מנטוריקה" className="h-9 w-auto md:h-11" />
-        <div>
-          <div className="text-xl font-extrabold tracking-tight text-teal-dark md:text-2xl">
-            מנטוריקה
-          </div>
-          <div className="text-[10px] font-medium tracking-widest text-muted-foreground">
-            MENTORIKA
-          </div>
+            {sideNav.map((item, i) => {
+              const active = i === 0;
+              return (
+                <button
+                  key={item}
+                  className={`mx-3 flex items-center justify-center text-center transition ${
+                    active ? "bg-white text-[#222] shadow-sm" : "text-white hover:bg-white/10"
+                  }`}
+                  style={{
+                    height: 56,
+                    borderRadius: 14,
+                    fontSize: 20,
+                    fontWeight: 700,
+                    marginBottom: 4,
+                  }}
+                >
+                  {item}
+                </button>
+              );
+            })}
+          </nav>
         </div>
       </div>
     </div>
   );
 }
 
-function PanelHeader({
-  children,
-  action,
-}: {
-  children: React.ReactNode;
-  action?: React.ReactNode;
-}) {
+function CardHeader({ children, action }: { children: React.ReactNode; action?: React.ReactNode }) {
   return (
-    <div className="flex items-center justify-between rounded-t-lg bg-teal px-4 py-2 text-white">
-      {action ?? <span />}
-      <h3 className="text-sm font-bold">{children}</h3>
+    <div
+      className="flex items-center justify-between bg-teal px-4 text-white"
+      style={{ height: 42, borderTopLeftRadius: 14, borderTopRightRadius: 14 }}
+    >
+      {action ?? <span className="w-6" />}
+      <h3 className="text-[20px] font-bold">{children}</h3>
+      <span className="w-6" />
     </div>
   );
 }
 
-function LeadsCard() {
+function Card({ children, className = "" }: { children: React.ReactNode; className?: string }) {
   return (
-    <div className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
-      <PanelHeader>לידים במו"מ</PanelHeader>
-      <ul className="divide-y divide-border">
-        {leads.map((l, i) => (
-          <li
-            key={i}
-            className="flex items-center gap-2 px-3 py-2 text-[12px] hover:bg-muted/40 sm:px-4 sm:text-[13px]"
-          >
-            <div className="flex items-center gap-0.5 text-muted-foreground">
-              <IconBtn><Phone className="h-3.5 w-3.5" /></IconBtn>
-              <IconBtn><Mail className="h-3.5 w-3.5 text-coral" /></IconBtn>
-              <IconBtn><Pencil className="h-3.5 w-3.5" /></IconBtn>
-              <IconBtn><Trash2 className="h-3.5 w-3.5" /></IconBtn>
-            </div>
-            <div className="flex-1 truncate text-right">
-              <span className="text-muted-foreground">{l.meta}</span>
-              <span className="mx-2 font-bold text-foreground">{l.name}</span>
-            </div>
-          </li>
-        ))}
-      </ul>
+    <div
+      className={`overflow-hidden bg-white ${className}`}
+      style={{
+        borderRadius: 14,
+        border: "1px solid #e7e7e7",
+        boxShadow: "0 2px 8px rgba(0,0,0,0.06)",
+      }}
+    >
+      {children}
     </div>
   );
 }
 
 function IconBtn({ children }: { children: React.ReactNode }) {
   return (
-    <button className="rounded p-1 text-muted-foreground transition hover:bg-muted hover:text-foreground">
+    <button className="rounded p-1 text-[#666] transition hover:bg-[#f0eeea] hover:text-[#222]">
       {children}
     </button>
   );
 }
 
+function LeadsCard() {
+  return (
+    <Card>
+      <CardHeader>לידים במו"מ</CardHeader>
+      <ul>
+        {leads.map((l, i) => (
+          <li
+            key={i}
+            className="flex items-center gap-2 border-b border-[#f0eeea] px-4 last:border-0"
+            style={{ height: 58 }}
+          >
+            <div className="flex items-center gap-1">
+              <IconBtn><Phone className="h-4 w-4" /></IconBtn>
+              <IconBtn><Mail className="h-4 w-4 text-coral" /></IconBtn>
+              <IconBtn><Pencil className="h-4 w-4" /></IconBtn>
+              <IconBtn><Trash2 className="h-4 w-4" /></IconBtn>
+            </div>
+            <div className="flex-1 text-right text-[14px]">
+              <span className="text-[#666]">{l.meta}</span>
+              <span className="mx-2 font-bold text-[#222]">{l.name}</span>
+            </div>
+          </li>
+        ))}
+      </ul>
+    </Card>
+  );
+}
+
 function TasksCard() {
   return (
-    <div className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
-      <PanelHeader
+    <Card>
+      <CardHeader
         action={
-          <button className="flex h-6 w-6 items-center justify-center rounded bg-coral text-white shadow hover:bg-coral-dark">
+          <button
+            className="flex items-center justify-center rounded bg-coral text-white shadow"
+            style={{ width: 26, height: 26 }}
+          >
             <Plus className="h-4 w-4" />
           </button>
         }
       >
         משימות שבועיות
-      </PanelHeader>
+      </CardHeader>
       <ul>
         {tasks.map((t, i) => {
           const isDanger = t.state === "danger";
-          const color = isDanger ? "text-coral" : "text-success";
+          const color = isDanger ? "#ff6b57" : "#28b463";
           return (
             <li
               key={i}
-              className="relative flex items-center justify-between gap-2 px-3 py-2 text-[12px] sm:px-4 sm:text-[13px]"
+              className="relative flex items-center justify-between gap-3 border-b border-[#f0eeea] px-4 last:border-0"
+              style={{ height: 78 }}
             >
-              {isDanger && (
-                <span className="absolute right-0 top-1 bottom-1 w-1 rounded-l bg-coral" />
-              )}
               <div className="flex items-center gap-1">
-                <IconBtn><Pencil className="h-3.5 w-3.5" /></IconBtn>
-                <IconBtn><Trash2 className="h-3.5 w-3.5 text-coral" /></IconBtn>
+                <IconBtn><Pencil className="h-4 w-4" /></IconBtn>
+                <IconBtn><Trash2 className="h-4 w-4 text-coral" /></IconBtn>
               </div>
               <div className="flex-1 text-right">
-                <div className={`font-bold ${color}`}>עדכון אתר</div>
-                <div className={`text-[10px] ${color}/80 sm:text-[11px]`}>היום 09:00 PM</div>
+                <div className="text-[16px] font-bold" style={{ color }}>עדכון אתר</div>
+                <div className="text-[12px]" style={{ color }}>היום 09:00 PM</div>
               </div>
-              {isDanger ? (
-                <Circle className={`h-4 w-4 fill-coral text-coral`} />
-              ) : (
-                <CheckCircle2 className={`h-4 w-4 fill-success text-white`} />
-              )}
+              <div
+                className="rounded-full"
+                style={{ width: 18, height: 18, background: color }}
+              />
             </li>
           );
         })}
       </ul>
-      <div className="flex items-center justify-between border-t border-border bg-muted/30 px-4 py-1.5 text-muted-foreground">
+      <div className="flex items-center justify-between border-t border-[#f0eeea] bg-[#faf8f5] px-4 py-2 text-[#666]">
         <MoreHorizontal className="h-4 w-4" />
         <div className="flex items-center gap-3">
           <Calendar className="h-4 w-4" />
@@ -267,87 +253,66 @@ function TasksCard() {
           <Plus className="h-4 w-4" />
         </div>
       </div>
-    </div>
+    </Card>
   );
 }
 
 function RevenueCard() {
-  const pct = 65;
   return (
-    <div className="rounded-lg border border-border bg-card p-3 shadow-sm">
-      <div className="mb-3 rounded-md bg-teal py-1.5 text-center text-[13px] font-bold text-white">
-        סך הכנסות לחודש <span className="underline">יולי</span>
-      </div>
-      <div className="flex items-center justify-between gap-3">
-        <Ring percent={pct} />
+    <Card>
+      <CardHeader>סך הכנסות לחודש <span className="underline">יולי</span></CardHeader>
+      <div className="flex items-center justify-between gap-4 px-5 py-6">
         <div className="text-right">
-          <div className="text-2xl font-extrabold text-coral md:text-3xl">
-            6,000 <span className="text-xl md:text-2xl">ש"ח</span>
+          <div className="text-[60px] font-bold leading-none text-coral">
+            6,000 <span className="text-[36px]">ש"ח</span>
           </div>
-          <div className="mt-1 text-[11px] text-muted-foreground">
+          <div className="mt-2 text-[14px] text-[#666]">
             מתוך יעד של 10,000 ש"ח
           </div>
         </div>
+        <img src={gaugeSvg} alt="65%" className="h-[128px] w-[128px] shrink-0" />
       </div>
-    </div>
-  );
-}
-
-function Ring({ percent }: { percent: number }) {
-  const r = 34;
-  const c = 2 * Math.PI * r;
-  const dash = (percent / 100) * c;
-  return (
-    <div className="relative h-20 w-20 shrink-0 md:h-24 md:w-24">
-      <svg viewBox="0 0 80 80" className="h-full w-full -rotate-90">
-        <circle cx="40" cy="40" r={r} stroke="oklch(0.92 0.02 200)" strokeWidth="7" fill="none" />
-        <circle
-          cx="40" cy="40" r={r}
-          stroke="var(--coral)"
-          strokeWidth="7"
-          fill="none"
-          strokeLinecap="round"
-          strokeDasharray={`${dash} ${c - dash}`}
-        />
-      </svg>
-      <div className="absolute inset-0 flex items-center justify-center text-sm font-extrabold text-foreground md:text-base">
-        {percent}%
-      </div>
-    </div>
+    </Card>
   );
 }
 
 function ActiveClientsCard() {
   return (
-    <div className="overflow-hidden rounded-lg border border-border bg-card shadow-sm">
-      <PanelHeader>לקוחות פעילים</PanelHeader>
-      <ul className="divide-y divide-border">
+    <Card>
+      <CardHeader>לקוחות פעילים</CardHeader>
+      <ul>
         {[0, 1, 2].map((i) => (
           <li
             key={i}
-            className="flex items-center justify-between gap-2 px-2 py-2 text-[10px] text-muted-foreground sm:text-[11px]"
+            className="flex items-center justify-between gap-2 border-b border-[#f0eeea] px-3 text-[12px] text-[#666] last:border-0"
+            style={{ height: 52 }}
           >
             <ChevronLeft className="h-3 w-3 shrink-0" />
             <span className="truncate">שירות ע"י | הצעת מחיר | תאריך</span>
-            <span className="shrink-0 font-bold text-foreground">39 לידים</span>
+            <span className="shrink-0 font-bold text-[#222]">39 לידים</span>
             <span className="shrink-0">הגיע ע"י</span>
           </li>
         ))}
       </ul>
-    </div>
+    </Card>
   );
 }
 
-function StatCard({ label, value, sub }: { label: string; value: string; sub: string }) {
+function StatCard({ label, value, sub, color }: { label: string; value: string; sub: string; color: string }) {
   return (
-    <div className="overflow-hidden rounded-lg border border-border bg-card text-center shadow-sm">
-      <div className="bg-teal py-1 text-xs font-bold text-white">{label}</div>
-      <div className="px-2 py-2">
-        <p className="min-h-[28px] whitespace-pre-line text-[10px] leading-tight text-muted-foreground">
+    <Card className="flex flex-col">
+      <div
+        className="bg-teal text-center text-[14px] font-bold text-white"
+        style={{ height: 28, lineHeight: "28px" }}
+      >
+        {label}
+      </div>
+      <div className="flex flex-1 flex-col items-center justify-between px-2 py-2">
+        <p className="whitespace-pre-line text-center text-[10px] leading-tight text-[#666]">
           {sub}
         </p>
-        <div className="mt-1 text-2xl font-extrabold text-coral">{value}</div>
+        <div className="text-[28px] font-bold" style={{ color }}>{value}</div>
       </div>
-    </div>
+    </Card>
   );
 }
