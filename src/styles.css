@@ -73,11 +73,20 @@
 
 @layer base {
   * { border-color: var(--color-border); }
-  html, body { direction: rtl; }
+  html, body { direction: rtl; overflow-x: hidden; }
   body {
     background-color: var(--color-page);
     color: var(--color-foreground);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
   }
+}
+
+.figma-wrap {
+  width: min(100vw, 1650px);
+  height: calc(min(100vw, 1650px) * 870 / 1650);
+}
+
+.figma-stage {
+  transform: scale(calc(min(100vw, 1650px) / 1650));
 }
