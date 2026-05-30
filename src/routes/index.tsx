@@ -169,10 +169,10 @@ function CardHeader({ children, action }: { children: React.ReactNode; action?: 
   return (
     <div
       className="relative flex items-center justify-center bg-teal px-3 text-white"
-      style={{ height: 36, borderTopLeftRadius: 10, borderTopRightRadius: 10 }}
+      style={{ height: 30, borderTopLeftRadius: 8, borderTopRightRadius: 8 }}
     >
       {action && <div className="absolute right-2 top-1/2 -translate-y-1/2">{action}</div>}
-      <h3 className="text-[16px] font-bold">{children}</h3>
+      <h3 className="text-[18px] font-bold leading-none text-[#111]">{children}</h3>
     </div>
   );
 }
@@ -182,9 +182,9 @@ function Card({ children, className = "" }: { children: React.ReactNode; classNa
     <div
       className={`overflow-hidden bg-white ${className}`}
       style={{
-        borderRadius: 10,
+        borderRadius: 8,
         border: "1px solid #e7e7e7",
-        boxShadow: "0 2px 6px rgba(0,0,0,0.04)",
+        boxShadow: "0 7px 18px rgba(0,0,0,0.13)",
       }}
     >
       {children}
