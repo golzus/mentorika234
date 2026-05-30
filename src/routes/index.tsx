@@ -48,97 +48,89 @@ const stats = [
 
 function LeadsDashboard() {
   return (
-    <div className="min-h-screen bg-page p-3 md:p-5 lg:p-6" dir="rtl">
-      {/* Outer cream container */}
-      <div className="relative mx-auto max-w-[1500px] rounded-[10px] bg-[#fffbf7] shadow-[0_4px_18px_rgba(0,0,0,0.05)]">
-        {/* Tip ribbon — inside top-left corner of cream container */}
+    <div className="min-h-screen w-screen overflow-auto bg-teal" dir="rtl">
+      <div className="relative mx-auto overflow-hidden figma-wrap">
+      <div
+        className="absolute left-0 top-0 h-[870px] w-[1650px] origin-top-left overflow-hidden bg-teal figma-stage"
+      >
+        {/* Inner cream container */}
+        <div className="absolute left-[30px] top-[30px] h-[810px] w-[1470px] rounded-[6px] bg-[#fffbf7] shadow-[0_4px_18px_rgba(0,0,0,0.05)]" />
+
+        {/* Tip ribbon */}
         <aside
-          className="absolute left-0 top-0 z-20 hidden w-[68px] bg-coral text-white md:block"
-          style={{ borderRadius: "0 0 8px 0" }}
+          className="absolute left-[24px] top-0 z-30 w-[96px] bg-coral text-white"
+          style={{ borderRadius: "0 0 6px 6px" }}
         >
           <div className="px-2 py-2 text-center">
-            <div className="mb-1 text-[12px] font-bold leading-tight">הטיפ היומי</div>
-            <div className="text-[10px] font-medium leading-tight">
+            <div className="mb-2 text-[17px] font-bold leading-tight">הטיפ היומי</div>
+            <div className="text-[14px] font-medium leading-tight">
               עקבי אחרי המספרים - הם מספרים את הסיפור האמיתי
             </div>
           </div>
         </aside>
 
-        <div className="flex">
-          {/* Main content (RTL: appears left side) */}
-          <main className="min-w-0 flex-1 p-4 pt-5 md:p-6 md:pt-6 lg:p-8">
+        {/* Sidebar - fixed on the RIGHT like the reference */}
+        <nav className="absolute bottom-[30px] right-[30px] top-[186px] z-20 flex w-[120px] flex-col rounded-tl-[10px] bg-teal">
+          <div className="absolute -top-[36px] right-0 h-[32px] w-[120px] rounded-full bg-[#fffbf7] text-center text-[16px] font-medium leading-[32px] text-[#222]">
+            מסך פתיחה
+          </div>
+          {sideNav.slice(1).map((item) => (
+            <button
+              key={item}
+              className="flex h-[82px] items-center justify-center px-2 text-center text-[17px] font-medium leading-tight text-[#222]"
+            >
+              {item}
+            </button>
+          ))}
+          <img src={logoZahavi} alt="זהבי הסגל" className="absolute bottom-[22px] left-1/2 h-[76px] w-auto -translate-x-1/2" />
+        </nav>
+
+        <main className="absolute left-[102px] top-[94px] z-10 w-[1342px]">
             {/* Header */}
-            <header className="mb-5 flex items-start justify-between gap-4">
+            <header className="mb-[28px] flex h-[84px] items-start justify-between gap-4" dir="ltr">
               {/* Logo - left in flow */}
-              <div className="flex shrink-0 items-center pl-[72px] md:pl-[80px]">
-                <img src={logoMentorika} alt="מנטוריקה" className="h-14 w-auto md:h-16" />
+              <div className="flex w-[230px] shrink-0 flex-col items-center pt-[2px]">
+                <img src={logoMentorika} alt="מנטוריקה" className="h-[45px] w-auto" />
+                <div className="mt-[-8px] text-[42px] font-extrabold leading-none text-[#19172f]">מנטוריקה</div>
               </div>
               {/* Greeting - right */}
-              <div className="text-right">
+              <div className="pt-[14px] text-right" dir="rtl">
                 <div className="flex items-baseline justify-end gap-3">
-                  <span className="text-[14px] text-[#222] md:text-[16px]">
+                  <span className="text-[17px] text-[#222]">
                     יום חמישי 16.04.2026
                   </span>
-                  <h1 className="text-[24px] font-medium leading-none text-[#222] md:text-[30px]">
+                  <h1 className="text-[40px] font-medium leading-none text-[#222]">
                     שלום ישראלה ישראלי
                   </h1>
                 </div>
-                <div className="mt-2 text-[11px] text-coral md:text-[12px]">
+                <div className="mt-3 text-[13px] text-coral">
                   להוסיף פירורי לחם בכל עמוד
                 </div>
               </div>
             </header>
 
             {/* Row 1: Tasks (right ~38%) + Leads (left ~62%) */}
-            <div className="grid grid-cols-1 gap-4 md:gap-5 lg:grid-cols-[38%_1fr]">
-              <TasksCard />
+            <div className="grid grid-cols-[810px_500px] gap-[30px]" dir="ltr">
               <LeadsCard />
+              <TasksCard />
             </div>
 
             {/* Row 2: Revenue (left) + Active Clients (middle) + Stats grid (right) */}
-            <div className="mt-4 grid grid-cols-1 gap-4 md:mt-5 md:gap-5 lg:grid-cols-[1fr_1fr_minmax(0,1.3fr)]">
-              {/* RTL order: stats first, then active clients, then revenue */}
-              <div className="order-3 lg:order-1">
+            <div className="mt-[30px] grid grid-cols-[430px_330px_500px] gap-[30px]" dir="ltr">
+              <div>
                 <RevenueCard />
               </div>
-              <div className="order-2">
+              <div>
                 <ActiveClientsCard />
               </div>
-              <div className="order-1 grid grid-cols-3 gap-2 lg:order-3">
+              <div className="grid grid-cols-3 gap-[2px]">
                 {stats.map((s) => <StatCard key={s.label} {...s} />)}
               </div>
             </div>
-
-            {/* Brand */}
-            <div className="mt-5 flex justify-end">
-              <img src={logoZahavi} alt="זהבי הסגל" className="h-10 w-auto md:h-12" />
-            </div>
-          </main>
-
-          {/* Sidebar - RIGHT (text only) */}
-          <nav className="hidden shrink-0 flex-col items-stretch py-8 pl-2 pr-4 lg:flex" style={{ width: 130 }}>
-            {sideNav.map((item, i) => {
-              const active = i === 0;
-              return (
-                <button
-                  key={item}
-                  className="relative mb-6 text-right text-[15px] font-medium text-[#222] transition hover:text-coral"
-                >
-                  {item}
-                  {active && (
-                    <span
-                      className="absolute -bottom-1 right-0 block bg-teal"
-                      style={{ width: 92, height: 3, borderRadius: 2 }}
-                    />
-                  )}
-                </button>
-              );
-            })}
-          </nav>
-        </div>
+        </main>
 
         {/* Mobile nav */}
-        <nav className="grid grid-cols-4 gap-1 border-t border-[#e7e7e7] p-2 lg:hidden">
+        <nav className="hidden">
           {sideNav.slice(0, 4).map((item, i) => (
             <button
               key={item}
@@ -151,6 +143,7 @@ function LeadsDashboard() {
           ))}
         </nav>
       </div>
+      </div>
     </div>
   );
 }
@@ -159,10 +152,10 @@ function CardHeader({ children, action }: { children: React.ReactNode; action?: 
   return (
     <div
       className="relative flex items-center justify-center bg-teal px-3 text-white"
-      style={{ height: 36, borderTopLeftRadius: 10, borderTopRightRadius: 10 }}
+      style={{ height: 30, borderTopLeftRadius: 8, borderTopRightRadius: 8 }}
     >
       {action && <div className="absolute right-2 top-1/2 -translate-y-1/2">{action}</div>}
-      <h3 className="text-[16px] font-bold">{children}</h3>
+      <h3 className="text-[18px] font-bold leading-none text-[#111]">{children}</h3>
     </div>
   );
 }
@@ -172,9 +165,9 @@ function Card({ children, className = "" }: { children: React.ReactNode; classNa
     <div
       className={`overflow-hidden bg-white ${className}`}
       style={{
-        borderRadius: 10,
+        borderRadius: 8,
         border: "1px solid #e7e7e7",
-        boxShadow: "0 2px 6px rgba(0,0,0,0.04)",
+        boxShadow: "0 7px 18px rgba(0,0,0,0.13)",
       }}
     >
       {children}
@@ -201,15 +194,15 @@ function LeadsCard() {
             className={`flex items-center gap-2 border-b border-[#f0eeea] px-3 last:border-0 ${
               i === 0 ? "bg-[#fff5f3]" : ""
             }`}
-            style={{ height: 44 }}
+            style={{ height: 51 }}
           >
             <div className="flex items-center gap-0.5">
-              <IconBtn><Phone className="h-3.5 w-3.5" /></IconBtn>
-              <IconBtn><Mail className="h-3.5 w-3.5 text-coral" /></IconBtn>
-              <IconBtn><Pencil className="h-3.5 w-3.5" /></IconBtn>
-              <IconBtn><Trash2 className="h-3.5 w-3.5" /></IconBtn>
+              <IconBtn><Phone className="h-4 w-4" /></IconBtn>
+              <IconBtn><Mail className="h-4 w-4 text-coral" /></IconBtn>
+              <IconBtn><Pencil className="h-4 w-4" /></IconBtn>
+              <IconBtn><Trash2 className="h-4 w-4" /></IconBtn>
             </div>
-            <div className="flex-1 text-right text-[13px]">
+            <div className="flex-1 text-right text-[17px]">
               <span className="text-[#444]">{l.meta}</span>
               <span className="mx-2 font-bold text-teal">{l.name}</span>
             </div>
@@ -227,9 +220,9 @@ function TasksCard() {
         action={
           <button
             className="flex items-center justify-center rounded bg-coral text-white shadow"
-            style={{ width: 22, height: 22 }}
+            style={{ width: 26, height: 26 }}
           >
-            <Plus className="h-3.5 w-3.5" />
+            <Plus className="h-4 w-4" />
           </button>
         }
       >
@@ -243,25 +236,25 @@ function TasksCard() {
             <li
               key={i}
               className="flex items-center justify-between gap-2 border-b border-[#f0eeea] px-3 last:border-0"
-              style={{ height: 50 }}
+              style={{ height: 51 }}
             >
               <div className="flex items-center gap-0.5">
                 <IconBtn><Pencil className="h-3 w-3" /></IconBtn>
                 <IconBtn><Trash2 className="h-3 w-3 text-coral" /></IconBtn>
               </div>
               <div className="flex-1 text-right">
-                <div className="text-[13px] font-bold" style={{ color }}>עדכון אתר</div>
-                <div className="text-[10px]" style={{ color }}>היום 09:00 PM</div>
+                <div className="text-[17px] font-bold leading-tight" style={{ color }}>עדכון אתר</div>
+                <div className="text-[12px] leading-tight" style={{ color }}>היום 09:00 PM</div>
               </div>
               <div
                 className="rounded-full border-2"
-                style={{ width: 14, height: 14, borderColor: color }}
+                style={{ width: 20, height: 20, borderColor: color }}
               />
             </li>
           );
         })}
       </ul>
-      <div className="flex items-center justify-between border-t border-[#f0eeea] bg-[#faf8f5] px-3 py-1.5 text-[#666]">
+      <div className="flex h-[31px] items-center justify-between border-t border-[#f0eeea] bg-[#faf8f5] px-3 text-[#666]">
         <MoreHorizontal className="h-3.5 w-3.5" />
         <div className="flex items-center gap-2">
           <Calendar className="h-3.5 w-3.5" />
