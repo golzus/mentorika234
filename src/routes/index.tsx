@@ -211,15 +211,15 @@ function LeadsCard() {
             className={`flex items-center gap-2 border-b border-[#f0eeea] px-3 last:border-0 ${
               i === 0 ? "bg-[#fff5f3]" : ""
             }`}
-            style={{ height: 44 }}
+            style={{ height: 51 }}
           >
             <div className="flex items-center gap-0.5">
-              <IconBtn><Phone className="h-3.5 w-3.5" /></IconBtn>
-              <IconBtn><Mail className="h-3.5 w-3.5 text-coral" /></IconBtn>
-              <IconBtn><Pencil className="h-3.5 w-3.5" /></IconBtn>
-              <IconBtn><Trash2 className="h-3.5 w-3.5" /></IconBtn>
+              <IconBtn><Phone className="h-4 w-4" /></IconBtn>
+              <IconBtn><Mail className="h-4 w-4 text-coral" /></IconBtn>
+              <IconBtn><Pencil className="h-4 w-4" /></IconBtn>
+              <IconBtn><Trash2 className="h-4 w-4" /></IconBtn>
             </div>
-            <div className="flex-1 text-right text-[13px]">
+            <div className="flex-1 text-right text-[17px]">
               <span className="text-[#444]">{l.meta}</span>
               <span className="mx-2 font-bold text-teal">{l.name}</span>
             </div>
