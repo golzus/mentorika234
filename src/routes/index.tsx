@@ -65,9 +65,9 @@ function LeadsDashboard() {
 
   return (
     <div className="min-h-screen overflow-auto bg-teal" dir="rtl" ref={wrapRef}>
-      <div className="mx-auto" style={{ width: 1650 * scale, height: 870 * scale }}>
+      <div className="relative mx-auto overflow-hidden" style={{ width: 1650 * scale, height: 870 * scale }}>
       <div
-        className="relative h-[870px] w-[1650px] origin-top-right overflow-hidden bg-teal"
+        className="absolute left-0 top-0 h-[870px] w-[1650px] origin-top-left overflow-hidden bg-teal"
         style={{ transform: `scale(${scale})` }}
       >
         {/* Inner cream container */}
