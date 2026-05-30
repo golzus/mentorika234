@@ -48,8 +48,8 @@ const stats = [
 
 function LeadsDashboard() {
   return (
-    <div className="min-h-screen bg-teal p-[7px]" dir="rtl">
-      <div className="relative mx-auto h-[calc(100vh-14px)] min-h-[520px] max-w-[1650px] overflow-hidden bg-teal">
+    <div className="min-h-screen overflow-auto bg-teal p-[7px]" dir="rtl">
+      <div className="relative mx-auto aspect-[1650/870] max-w-[1650px] overflow-hidden bg-teal">
         {/* Inner cream container */}
         <div className="absolute bottom-[18px] left-[20px] right-[91px] top-[18px] rounded-[3px] bg-[#fffbf7] shadow-[0_4px_18px_rgba(0,0,0,0.05)]" />
 
@@ -82,15 +82,16 @@ function LeadsDashboard() {
           <img src={logoZahavi} alt="זהבי הסגל" className="absolute bottom-[12px] left-1/2 h-[44px] w-auto -translate-x-1/2" />
         </nav>
 
-        <main className="absolute bottom-[40px] left-[55px] right-[126px] top-[48px] z-10 min-w-0">
+        <main className="absolute bottom-[40px] left-[55px] right-[126px] top-[38px] z-10 min-w-0">
             {/* Header */}
-            <header className="mb-[14px] flex h-[57px] items-start justify-between gap-4">
+            <header className="mb-[14px] flex h-[57px] items-start justify-between gap-4" dir="ltr">
               {/* Logo - left in flow */}
-              <div className="flex shrink-0 items-center pt-[8px]">
-                <img src={logoMentorika} alt="מנטוריקה" className="h-[62px] w-auto" />
+              <div className="flex w-[170px] shrink-0 flex-col items-center pt-[8px]">
+                <img src={logoMentorika} alt="מנטוריקה" className="h-[30px] w-auto" />
+                <div className="mt-[-4px] text-[27px] font-extrabold leading-none text-[#19172f]">מנטוריקה</div>
               </div>
               {/* Greeting - right */}
-              <div className="pt-[14px] text-right">
+              <div className="pt-[14px] text-right" dir="rtl">
                 <div className="flex items-baseline justify-end gap-3">
                   <span className="text-[12px] text-[#222] md:text-[13px]">
                     יום חמישי 16.04.2026
@@ -106,13 +107,13 @@ function LeadsDashboard() {
             </header>
 
             {/* Row 1: Tasks (right ~38%) + Leads (left ~62%) */}
-            <div className="grid grid-cols-1 gap-[18px] lg:grid-cols-[1.55fr_0.95fr]">
+            <div className="grid grid-cols-1 gap-[18px] md:grid-cols-[1.55fr_0.95fr]" dir="ltr">
               <LeadsCard />
               <TasksCard />
             </div>
 
             {/* Row 2: Revenue (left) + Active Clients (middle) + Stats grid (right) */}
-            <div className="mt-[18px] grid grid-cols-1 gap-[18px] lg:grid-cols-[1fr_0.92fr_1.14fr]">
+            <div className="mt-[18px] grid grid-cols-1 gap-[18px] md:grid-cols-[1fr_0.92fr_1.14fr]" dir="ltr">
               <div>
                 <RevenueCard />
               </div>
