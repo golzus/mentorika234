@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useRef, useState } from "react";
 import {
   Phone, Mail, Pencil, Trash2, Plus, Calendar, Clock, MoreHorizontal,
   ChevronLeft,
@@ -48,25 +47,11 @@ const stats = [
 ];
 
 function LeadsDashboard() {
-  const wrapRef = useRef<HTMLDivElement>(null);
-  const [scale, setScale] = useState(1);
-
-  useEffect(() => {
-    const updateScale = () => {
-      setScale(Math.min(window.innerWidth / 1650, 1));
-    };
-
-    updateScale();
-    window.addEventListener("resize", updateScale);
-    return () => window.removeEventListener("resize", updateScale);
-  }, []);
-
   return (
-    <div className="min-h-screen w-screen overflow-auto bg-teal" dir="rtl" ref={wrapRef}>
-      <div className="relative mx-auto overflow-hidden" style={{ width: 1650 * scale, height: 870 * scale }}>
+    <div className="min-h-screen w-screen overflow-auto bg-teal" dir="rtl">
+      <div className="relative mx-auto overflow-hidden figma-wrap">
       <div
-        className="absolute left-0 top-0 h-[870px] w-[1650px] origin-top-left overflow-hidden bg-teal"
-        style={{ transform: `scale(${scale})` }}
+        className="absolute left-0 top-0 h-[870px] w-[1650px] origin-top-left overflow-hidden bg-teal figma-stage"
       >
         {/* Inner cream container */}
         <div className="absolute left-[30px] top-[30px] h-[810px] w-[1470px] rounded-[6px] bg-[#fffbf7] shadow-[0_4px_18px_rgba(0,0,0,0.05)]" />
