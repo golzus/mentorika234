@@ -53,9 +53,7 @@ function LeadsDashboard() {
 
   useEffect(() => {
     const updateScale = () => {
-      if (!wrapRef.current) return;
-      const width = wrapRef.current.clientWidth;
-      setScale(Math.min(width / 1650, 1));
+      setScale(Math.min(window.innerWidth / 1650, 1));
     };
 
     updateScale();
@@ -64,7 +62,7 @@ function LeadsDashboard() {
   }, []);
 
   return (
-    <div className="min-h-screen overflow-auto bg-teal" dir="rtl" ref={wrapRef}>
+    <div className="min-h-screen w-screen overflow-auto bg-teal" dir="rtl" ref={wrapRef}>
       <div className="relative mx-auto overflow-hidden" style={{ width: 1650 * scale, height: 870 * scale }}>
       <div
         className="absolute left-0 top-0 h-[870px] w-[1650px] origin-top-left overflow-hidden bg-teal"
