@@ -237,9 +237,9 @@ function TasksCard() {
         action={
           <button
             className="flex items-center justify-center rounded bg-coral text-white shadow"
-            style={{ width: 22, height: 22 }}
+            style={{ width: 26, height: 26 }}
           >
-            <Plus className="h-3.5 w-3.5" />
+            <Plus className="h-4 w-4" />
           </button>
         }
       >
@@ -253,25 +253,25 @@ function TasksCard() {
             <li
               key={i}
               className="flex items-center justify-between gap-2 border-b border-[#f0eeea] px-3 last:border-0"
-              style={{ height: 50 }}
+              style={{ height: 51 }}
             >
               <div className="flex items-center gap-0.5">
                 <IconBtn><Pencil className="h-3 w-3" /></IconBtn>
                 <IconBtn><Trash2 className="h-3 w-3 text-coral" /></IconBtn>
               </div>
               <div className="flex-1 text-right">
-                <div className="text-[13px] font-bold" style={{ color }}>עדכון אתר</div>
-                <div className="text-[10px]" style={{ color }}>היום 09:00 PM</div>
+                <div className="text-[17px] font-bold leading-tight" style={{ color }}>עדכון אתר</div>
+                <div className="text-[12px] leading-tight" style={{ color }}>היום 09:00 PM</div>
               </div>
               <div
                 className="rounded-full border-2"
-                style={{ width: 14, height: 14, borderColor: color }}
+                style={{ width: 20, height: 20, borderColor: color }}
               />
             </li>
           );
         })}
       </ul>
-      <div className="flex items-center justify-between border-t border-[#f0eeea] bg-[#faf8f5] px-3 py-1.5 text-[#666]">
+      <div className="flex h-[31px] items-center justify-between border-t border-[#f0eeea] bg-[#faf8f5] px-3 text-[#666]">
         <MoreHorizontal className="h-3.5 w-3.5" />
         <div className="flex items-center gap-2">
           <Calendar className="h-3.5 w-3.5" />
