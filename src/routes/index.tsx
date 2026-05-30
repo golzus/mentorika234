@@ -48,13 +48,15 @@ const stats = [
 
 function LeadsDashboard() {
   return (
-    <div className="min-h-screen bg-page p-3 md:p-5 lg:p-6" dir="rtl">
-      {/* Outer cream container */}
-      <div className="relative mx-auto max-w-[1500px] rounded-[10px] bg-[#fffbf7] shadow-[0_4px_18px_rgba(0,0,0,0.05)]">
-        {/* Tip ribbon — inside top-left corner of cream container */}
+    <div className="min-h-screen bg-teal p-[7px]" dir="rtl">
+      <div className="relative mx-auto h-[calc(100vh-14px)] min-h-[520px] max-w-[1650px] overflow-hidden bg-teal">
+        {/* Inner cream container */}
+        <div className="absolute bottom-[18px] left-[20px] right-[91px] top-[18px] rounded-[3px] bg-[#fffbf7] shadow-[0_4px_18px_rgba(0,0,0,0.05)]" />
+
+        {/* Tip ribbon */}
         <aside
-          className="absolute left-0 top-0 z-20 hidden w-[68px] bg-coral text-white md:block"
-          style={{ borderRadius: "0 0 8px 0" }}
+          className="absolute left-[17px] top-0 z-30 hidden w-[68px] bg-coral text-white md:block"
+          style={{ borderRadius: "0 0 6px 6px" }}
         >
           <div className="px-2 py-2 text-center">
             <div className="mb-1 text-[12px] font-bold leading-tight">הטיפ היומי</div>
@@ -64,81 +66,67 @@ function LeadsDashboard() {
           </div>
         </aside>
 
-        <div className="flex">
-          {/* Main content (RTL: appears left side) */}
-          <main className="min-w-0 flex-1 p-4 pt-5 md:p-6 md:pt-6 lg:p-8">
+        {/* Sidebar - fixed on the RIGHT like the reference */}
+        <nav className="absolute bottom-[28px] right-[21px] top-[108px] z-20 hidden w-[70px] rounded-tl-[8px] bg-teal lg:flex lg:flex-col">
+          <div className="absolute -top-[20px] right-0 h-[22px] w-[74px] rounded-full bg-[#fffbf7] text-center text-[11px] font-medium leading-[22px] text-[#222]">
+            מסך פתיחה
+          </div>
+          {sideNav.slice(1).map((item) => (
+            <button
+              key={item}
+              className="flex h-[50px] items-center justify-center px-1 text-center text-[12px] font-medium leading-tight text-[#222]"
+            >
+              {item}
+            </button>
+          ))}
+          <img src={logoZahavi} alt="זהבי הסגל" className="absolute bottom-[12px] left-1/2 h-[44px] w-auto -translate-x-1/2" />
+        </nav>
+
+        <main className="absolute bottom-[40px] left-[55px] right-[126px] top-[48px] z-10 min-w-0">
             {/* Header */}
-            <header className="mb-5 flex items-start justify-between gap-4">
+            <header className="mb-[14px] flex h-[57px] items-start justify-between gap-4">
               {/* Logo - left in flow */}
-              <div className="flex shrink-0 items-center pl-[72px] md:pl-[80px]">
-                <img src={logoMentorika} alt="מנטוריקה" className="h-14 w-auto md:h-16" />
+              <div className="flex shrink-0 items-center pt-[8px]">
+                <img src={logoMentorika} alt="מנטוריקה" className="h-[62px] w-auto" />
               </div>
               {/* Greeting - right */}
-              <div className="text-right">
+              <div className="pt-[14px] text-right">
                 <div className="flex items-baseline justify-end gap-3">
-                  <span className="text-[14px] text-[#222] md:text-[16px]">
+                  <span className="text-[12px] text-[#222] md:text-[13px]">
                     יום חמישי 16.04.2026
                   </span>
                   <h1 className="text-[24px] font-medium leading-none text-[#222] md:text-[30px]">
                     שלום ישראלה ישראלי
                   </h1>
                 </div>
-                <div className="mt-2 text-[11px] text-coral md:text-[12px]">
+                <div className="mt-2 text-[10px] text-coral md:text-[11px]">
                   להוסיף פירורי לחם בכל עמוד
                 </div>
               </div>
             </header>
 
             {/* Row 1: Tasks (right ~38%) + Leads (left ~62%) */}
-            <div className="grid grid-cols-1 gap-4 md:gap-5 lg:grid-cols-[38%_1fr]">
-              <TasksCard />
+            <div className="grid grid-cols-1 gap-[18px] lg:grid-cols-[1.55fr_0.95fr]">
               <LeadsCard />
+              <TasksCard />
             </div>
 
             {/* Row 2: Revenue (left) + Active Clients (middle) + Stats grid (right) */}
-            <div className="mt-4 grid grid-cols-1 gap-4 md:mt-5 md:gap-5 lg:grid-cols-[1fr_1fr_minmax(0,1.3fr)]">
-              {/* RTL order: stats first, then active clients, then revenue */}
-              <div className="order-3 lg:order-1">
+            <div className="mt-[18px] grid grid-cols-1 gap-[18px] lg:grid-cols-[1fr_0.92fr_1.14fr]">
+              <div>
                 <RevenueCard />
               </div>
-              <div className="order-2">
+              <div>
                 <ActiveClientsCard />
               </div>
-              <div className="order-1 grid grid-cols-3 gap-2 lg:order-3">
+              <div className="grid grid-cols-3 gap-[2px]">
                 {stats.map((s) => <StatCard key={s.label} {...s} />)}
               </div>
             </div>
-
-            {/* Brand */}
-            <div className="mt-5 flex justify-end">
-              <img src={logoZahavi} alt="זהבי הסגל" className="h-10 w-auto md:h-12" />
-            </div>
-          </main>
-
-          {/* Sidebar - RIGHT (text only) */}
-          <nav className="hidden shrink-0 flex-col items-stretch py-8 pl-2 pr-4 lg:flex" style={{ width: 130 }}>
-            {sideNav.map((item, i) => {
-              const active = i === 0;
-              return (
-                <button
-                  key={item}
-                  className="relative mb-6 text-right text-[15px] font-medium text-[#222] transition hover:text-coral"
-                >
-                  {item}
-                  {active && (
-                    <span
-                      className="absolute -bottom-1 right-0 block bg-teal"
-                      style={{ width: 92, height: 3, borderRadius: 2 }}
-                    />
-                  )}
-                </button>
-              );
-            })}
-          </nav>
-        </div>
+        </main>
 
         {/* Mobile nav */}
-        <nav className="grid grid-cols-4 gap-1 border-t border-[#e7e7e7] p-2 lg:hidden">
+        <nav className="absolute bottom-0 left-0 right-0 z-30 grid grid-cols-4 gap-1 border-t border-[#e7e7e7] bg-[#fffbf7] p-2 lg:hidden">
           {sideNav.slice(0, 4).map((item, i) => (
             <button
               key={item}
