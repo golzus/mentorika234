@@ -4,7 +4,7 @@ import logoZahavi from "@/assets/logo-zahavi.png";
 
 const sideNav: { label: string; to: string }[] = [
   { label: "מסך פתיחה", to: "/" },
-  { label: "פרופיל העסק", to: "/" },
+  { label: "פרופיל העסק", to: "/profile" },
   { label: "מעקב שיווק", to: "/marketing" },
   { label: "מעקב לידים", to: "/" },
   { label: "שימור לקוחות", to: "/" },
