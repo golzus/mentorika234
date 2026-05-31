@@ -88,7 +88,7 @@ function QACard({
 
 function LogoSchwimmer() {
   return (
-    <div className="flex items-baseline gap-1">
+    <div dir="ltr" className="flex items-baseline">
       <span className="text-[34px] font-extrabold tracking-tight text-[#e84c9a]">sch</span>
       <span className="text-[34px] font-extrabold tracking-tight text-[#1e3a8a]">w</span>
       <span className="text-[34px] font-extrabold tracking-tight text-[#1e3a8a]">mmer</span>
