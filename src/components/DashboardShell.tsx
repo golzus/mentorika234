@@ -42,16 +42,34 @@ export function DashboardShell({
 
           {/* Sidebar on the RIGHT */}
           <nav className="absolute bottom-[30px] right-[30px] top-[186px] z-20 flex w-[120px] flex-col rounded-tl-[10px] bg-teal">
-            {sideNav.map((item) => {
-              const isActive = item.label === active;
-              return isActive ? (
-                <div
-                  key={item.label}
-                  className="absolute -top-[36px] right-0 h-[32px] w-[120px] rounded-full bg-[#fffbf7] text-center text-[16px] font-medium leading-[32px] text-[#222]"
-                >
-                  {item.label}
-                </div>
-              ) : (
+            {/* "מסך פתיחה" floating pill above */}
+            {active === "מסך פתיחה" ? (
+              <div className="absolute -top-[36px] right-0 h-[32px] w-[120px] rounded-full bg-[#fffbf7] text-center text-[16px] font-medium leading-[32px] text-[#222]">
+                מסך פתיחה
+              </div>
+            ) : (
+              <Link
+                to="/"
+                className="absolute -top-[36px] right-0 h-[32px] w-[120px] rounded-full text-center text-[16px] font-medium leading-[32px] text-white hover:opacity-80"
+              >
+                מסך פתיחה
+              </Link>
+            )}
+
+            {sideNav.slice(1).map((item) => {
+              if (item.label === active) {
+                return (
+                  <div
+                    key={item.label}
+                    className="relative flex h-[82px] items-center justify-center"
+                  >
+                    <div className="absolute right-0 h-[32px] w-[140px] rounded-full bg-[#fffbf7] text-center text-[16px] font-medium leading-[32px] text-[#222] shadow-[0_2px_6px_rgba(0,0,0,0.08)]">
+                      {item.label}
+                    </div>
+                  </div>
+                );
+              }
+              return (
                 <Link
                   key={item.label}
                   to={item.to}
@@ -61,17 +79,13 @@ export function DashboardShell({
                 </Link>
               );
             })}
+
             <img
               src={logoZahavi}
               alt="זהבי הסגל"
               className="absolute bottom-[22px] left-1/2 h-[76px] w-auto -translate-x-1/2"
             />
           </nav>
-
-          {/* Active label override: if active is not "מסך פתיחה", render its tab in place */}
-          {active !== "מסך פתיחה" && (
-            <ActivePill active={active} />
-          )}
 
           <main className="absolute left-[102px] top-[94px] z-10 w-[1342px]">
             {/* Header */}
@@ -97,21 +111,6 @@ export function DashboardShell({
           </main>
         </div>
       </div>
-    </div>
-  );
-}
-
-function ActivePill({ active }: { active: string }) {
-  const idx = sideNav.findIndex((i) => i.label === active);
-  if (idx <= 0) return null;
-  // Position pill aligned to the right sidebar slot for the active item.
-  const top = 186 + idx * 82 + 41 - 16; // center of the row, minus half pill height
-  return (
-    <div
-      className="absolute right-[30px] z-30 h-[32px] w-[140px] rounded-full bg-[#fffbf7] text-center text-[16px] font-medium leading-[32px] text-[#222] shadow-[0_2px_6px_rgba(0,0,0,0.08)]"
-      style={{ top }}
-    >
-      {active}
     </div>
   );
 }
