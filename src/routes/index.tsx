@@ -16,17 +16,6 @@ export const Route = createFileRoute("/")({
   component: LeadsDashboard,
 });
 
-const sideNav = [
-  "מסך פתיחה",
-  "פרופיל העסק",
-  "מעקב שיווק",
-  "מעקב לידים",
-  "שימור לקוחות",
-  "גביה ותשלומים",
-  "ניהול שוטף",
-  "חדר בקרה",
-];
-
 const leads = Array.from({ length: 5 }).map(() => ({
   name: "ישראלה ישראלי",
   meta: 'המלצה | אתר תדמית | 5000 | 01.01.2026',
@@ -47,103 +36,26 @@ const stats = [
 
 function LeadsDashboard() {
   return (
-    <div className="min-h-screen w-screen overflow-auto bg-teal" dir="rtl">
-      <div className="relative mx-auto overflow-hidden figma-wrap">
-      <div
-        className="absolute left-0 top-0 h-[870px] w-[1650px] origin-top-left overflow-hidden bg-teal figma-stage"
-      >
-        {/* Inner cream container */}
-        <div className="absolute left-[30px] top-[30px] h-[810px] w-[1470px] rounded-[6px] bg-[#fffbf7] shadow-[0_4px_18px_rgba(0,0,0,0.05)]" />
-
-        {/* Tip ribbon */}
-        <aside
-          className="absolute left-[24px] top-0 z-30 w-[96px] bg-coral text-white"
-          style={{ borderRadius: "0 0 6px 6px" }}
-        >
-          <div className="px-2 py-2 text-center">
-            <div className="mb-2 text-[17px] font-bold leading-tight">הטיפ היומי</div>
-            <div className="text-[14px] font-medium leading-tight">
-              עקבי אחרי המספרים - הם מספרים את הסיפור האמיתי
-            </div>
-          </div>
-        </aside>
-
-        {/* Sidebar - fixed on the RIGHT like the reference */}
-        <nav className="absolute bottom-[30px] right-[30px] top-[186px] z-20 flex w-[120px] flex-col rounded-tl-[10px] bg-teal">
-          <div className="absolute -top-[36px] right-0 h-[32px] w-[120px] rounded-full bg-[#fffbf7] text-center text-[16px] font-medium leading-[32px] text-[#222]">
-            מסך פתיחה
-          </div>
-          {sideNav.slice(1).map((item) => (
-            <button
-              key={item}
-              className="flex h-[82px] items-center justify-center px-2 text-center text-[17px] font-medium leading-tight text-[#222]"
-            >
-              {item}
-            </button>
-          ))}
-          <img src={logoZahavi} alt="זהבי הסגל" className="absolute bottom-[22px] left-1/2 h-[76px] w-auto -translate-x-1/2" />
-        </nav>
-
-        <main className="absolute left-[102px] top-[94px] z-10 w-[1342px]">
-            {/* Header */}
-            <header className="mb-[28px] flex h-[84px] items-start justify-between gap-4" dir="ltr">
-              {/* Logo - left in flow */}
-              <div className="flex w-[230px] shrink-0 flex-col items-center pt-[2px]">
-                <img src={logoMentorika} alt="מנטוריקה" className="h-[45px] w-auto" />
-                <div className="mt-[-8px] text-[42px] font-extrabold leading-none text-[#19172f]">מנטוריקה</div>
-              </div>
-              {/* Greeting - right */}
-              <div className="pt-[14px] text-right" dir="rtl">
-                <div className="flex items-baseline justify-end gap-3">
-                  <span className="text-[17px] text-[#222]">
-                    יום חמישי 16.04.2026
-                  </span>
-                  <h1 className="text-[40px] font-medium leading-none text-[#222]">
-                    שלום ישראלה ישראלי
-                  </h1>
-                </div>
-                <div className="mt-3 text-[13px] text-coral">
-                  להוסיף פירורי לחם בכל עמוד
-                </div>
-              </div>
-            </header>
-
-            {/* Row 1: Tasks (right ~38%) + Leads (left ~62%) */}
-            <div className="grid grid-cols-[810px_500px] gap-[30px]" dir="ltr">
-              <LeadsCard />
-              <TasksCard />
-            </div>
-
-            {/* Row 2: Revenue (left) + Active Clients (middle) + Stats grid (right) */}
-            <div className="mt-[30px] grid grid-cols-[430px_330px_500px] gap-[30px]" dir="ltr">
-              <div>
-                <RevenueCard />
-              </div>
-              <div>
-                <ActiveClientsCard />
-              </div>
-              <div className="grid grid-cols-3 gap-[2px]">
-                {stats.map((s) => <StatCard key={s.label} {...s} />)}
-              </div>
-            </div>
-        </main>
-
-        {/* Mobile nav */}
-        <nav className="hidden">
-          {sideNav.slice(0, 4).map((item, i) => (
-            <button
-              key={item}
-              className={`rounded px-2 py-2 text-[11px] font-medium ${
-                i === 0 ? "bg-teal text-white" : "text-[#222]"
-              }`}
-            >
-              {item}
-            </button>
-          ))}
-        </nav>
+    <DashboardShell active="מסך פתיחה">
+      {/* Row 1: Tasks (right ~38%) + Leads (left ~62%) */}
+      <div className="grid grid-cols-[810px_500px] gap-[30px]" dir="ltr">
+        <LeadsCard />
+        <TasksCard />
       </div>
+
+      {/* Row 2: Revenue (left) + Active Clients (middle) + Stats grid (right) */}
+      <div className="mt-[30px] grid grid-cols-[430px_330px_500px] gap-[30px]" dir="ltr">
+        <div>
+          <RevenueCard />
+        </div>
+        <div>
+          <ActiveClientsCard />
+        </div>
+        <div className="grid grid-cols-3 gap-[2px]">
+          {stats.map((s) => <StatCard key={s.label} {...s} />)}
+        </div>
       </div>
-    </div>
+    </DashboardShell>
   );
 }
 
