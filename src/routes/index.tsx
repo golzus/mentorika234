@@ -3,9 +3,8 @@ import {
   Phone, Mail, Pencil, Trash2, Plus, Calendar, Clock, MoreHorizontal,
   ChevronLeft,
 } from "lucide-react";
-import logoMentorika from "@/assets/logo-mentorika.png";
-import logoZahavi from "@/assets/logo-zahavi.png";
 import gaugeSvg from "@/assets/gauge-65.svg";
+import { DashboardShell } from "@/components/DashboardShell";
 
 export const Route = createFileRoute("/")({
   head: () => ({
