@@ -82,22 +82,22 @@
   }
 }
 
-.figma-fit {
-  position: fixed;
-  inset: 0;
-  display: grid;
-  place-items: center;
-  overflow: hidden;
-  background: #00b6b5;
-}
 .figma-wrap {
-  width: 1650px;
-  height: 870px;
-  transform-origin: center center;
-  transform: scale(min(100vw / 1650, 100vh / 870));
-  flex-shrink: 0;
+  width: min(100vw, 1650px);
+  height: calc(min(100vw, 1650px) * 870 / 1650);
 }
 
-html, body { height: 100%; overflow: hidden; }
+.figma-stage {
+  transform: scale(1);
+}
 
-
+@media (max-width: 1649px) { .figma-stage { transform: scale(0.93); } }
+@media (max-width: 1536px) { .figma-stage { transform: scale(0.93); } }
+@media (max-width: 1366px) { .figma-stage { transform: scale(0.828); } }
+@media (max-width: 1280px) { .figma-stage { transform: scale(0.776); } }
+@media (max-width: 1024px) { .figma-stage { transform: scale(0.621); } }
+@media (max-width: 834px) { .figma-stage { transform: scale(0.505); } }
+@media (max-width: 768px) { .figma-stage { transform: scale(0.465); } }
+@media (max-width: 414px) { .figma-stage { transform: scale(0.251); } }
+@media (max-width: 390px) { .figma-stage { transform: scale(0.236); } }
+@media (max-width: 375px) { .figma-stage { transform: scale(0.227); } }
