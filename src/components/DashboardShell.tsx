@@ -29,12 +29,12 @@ export function DashboardShell({
 
           {/* Tip ribbon */}
           <aside
-            className="absolute left-[24px] top-0 z-30 w-[96px] bg-coral text-white"
+            className="absolute left-[24px] top-0 z-30 w-[78px] bg-coral text-white"
             style={{ borderRadius: "0 0 6px 6px" }}
           >
             <div className="px-2 py-2 text-center">
-              <div className="mb-2 text-[17px] font-bold leading-tight">הטיפ היומי</div>
-              <div className="text-[14px] font-medium leading-tight">
+              <div className="mb-1 text-[13px] font-bold leading-tight">הטיפ היומי</div>
+              <div className="text-[10px] font-medium leading-[1.2]">
                 עקבי אחרי המספרים - הם מספרים את הסיפור האמיתי
               </div>
             </div>
