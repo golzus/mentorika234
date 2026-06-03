@@ -21,9 +21,10 @@ export function DashboardShell({
   children: React.ReactNode;
 }) {
   return (
-    <div className="min-h-screen w-screen overflow-auto bg-teal" dir="rtl">
-      <div className="relative mx-auto overflow-hidden figma-wrap">
-        <div className="absolute left-0 top-0 h-[870px] w-[1650px] origin-top-left overflow-hidden bg-teal figma-stage">
+    <div className="h-screen w-screen overflow-hidden bg-teal" dir="rtl">
+      <div className="relative figma-wrap mr-auto ml-0">
+        <div className="absolute left-0 top-0 h-[870px] w-[1650px] overflow-hidden bg-teal">
+
           {/* Inner cream container */}
           <div className="absolute left-[30px] top-[30px] h-[810px] w-[1470px] rounded-[6px] bg-[#fffbf7] shadow-[0_4px_18px_rgba(0,0,0,0.05)]" />
 
