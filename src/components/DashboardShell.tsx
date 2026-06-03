@@ -91,7 +91,7 @@ export function DashboardShell({
             {/* Header */}
             <header className="mb-[20px] flex h-[60px] items-center justify-between gap-4" dir="ltr">
               <div className="flex shrink-0 items-center gap-2">
-                <img src={logoMentorika} alt="" className="h-[44px] w-auto" />
+                <img src={logoMentorika} alt="" className="h-[34px] w-auto" />
                 <div className="text-[28px] font-extrabold leading-none text-[#19172f]">
                   מנטוריקה
                 </div>
