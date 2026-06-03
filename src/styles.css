@@ -82,12 +82,22 @@
   }
 }
 
+.figma-fit {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: #00b6b5;
+}
 .figma-wrap {
   width: 1650px;
   height: 870px;
-  transform-origin: top right;
-  transform: scale(min(calc(100vw / 1650), calc(100vh / 870)));
+  transform-origin: center center;
+  transform: scale(min(100vw / 1650, 100vh / 870));
+  flex-shrink: 0;
 }
 
 html, body { height: 100%; overflow: hidden; }
+
 
