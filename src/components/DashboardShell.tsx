@@ -29,12 +29,12 @@ export function DashboardShell({
 
           {/* Tip ribbon */}
           <aside
-            className="absolute left-[24px] top-0 z-30 w-[96px] bg-coral text-white"
+            className="absolute left-[24px] top-0 z-30 w-[78px] bg-coral text-white"
             style={{ borderRadius: "0 0 6px 6px" }}
           >
             <div className="px-2 py-2 text-center">
-              <div className="mb-2 text-[17px] font-bold leading-tight">הטיפ היומי</div>
-              <div className="text-[14px] font-medium leading-tight">
+              <div className="mb-1 text-[13px] font-bold leading-tight">הטיפ היומי</div>
+              <div className="text-[10px] font-medium leading-[1.2]">
                 עקבי אחרי המספרים - הם מספרים את הסיפור האמיתי
               </div>
             </div>
@@ -87,23 +87,23 @@ export function DashboardShell({
             />
           </nav>
 
-          <main className="absolute left-[102px] top-[94px] z-10 w-[1342px]">
+          <main className="absolute left-[60px] top-[60px] z-10 w-[1384px]">
             {/* Header */}
-            <header className="mb-[28px] flex h-[84px] items-start justify-between gap-4" dir="ltr">
-              <div className="flex w-[230px] shrink-0 flex-col items-center pt-[2px]">
-                <img src={logoMentorika} alt="מנטוריקה" className="h-[45px] w-auto" />
-                <div className="mt-[-8px] text-[42px] font-extrabold leading-none text-[#19172f]">
+            <header className="mb-[20px] flex h-[60px] items-center justify-between gap-4" dir="ltr">
+              <div className="flex shrink-0 items-center gap-2">
+                <img src={logoMentorika} alt="" className="h-[34px] w-auto" />
+                <div className="text-[28px] font-extrabold leading-none text-[#19172f]">
                   מנטוריקה
                 </div>
               </div>
-              <div className="pt-[14px] text-right" dir="rtl">
-                <div className="flex items-baseline justify-end gap-3">
-                  <span className="text-[17px] text-[#222]">יום חמישי 16.04.2026</span>
-                  <h1 className="text-[40px] font-medium leading-none text-[#222]">
+              <div className="text-right" dir="rtl">
+                <div className="flex items-baseline justify-end gap-2">
+                  <span className="text-[12px] text-[#666]">יום חמישי 16.04.2026</span>
+                  <h1 className="text-[26px] font-medium leading-none text-[#222]">
                     שלום ישראלה ישראלי
                   </h1>
                 </div>
-                <div className="mt-3 text-[13px] text-coral">להוסיף פירורי לחם בכל עמוד</div>
+                <div className="mt-1 text-[10px] text-coral">להוסיף פירורי לחם בכל עמוד</div>
               </div>
             </header>
 
