@@ -6,7 +6,7 @@ const sideNav: { label: string; to: string }[] = [
   { label: "מסך פתיחה", to: "/" },
   { label: "פרופיל העסק", to: "/profile" },
   { label: "מעקב שיווק", to: "/marketing" },
-  { label: "מעקב לידים", to: "/" },
+  { label: "מעקב לידים", to: "/leads" },
   { label: "שימור לקוחות", to: "/" },
   { label: "גביה ותשלומים", to: "/" },
   { label: "ניהול שוטף", to: "/" },
