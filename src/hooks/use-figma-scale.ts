@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 export const FIGMA_WIDTH = 1650;
 export const FIGMA_HEIGHT = 870;
 
-/** Below this viewport size: fit width + allow vertical scroll */
+/** 1024–1400px or height < 750px → compact (scaled canvas, vertical scroll) */
 const COMPACT_MAX_WIDTH = 1400;
 const COMPACT_MAX_HEIGHT = 750;
 
@@ -26,12 +26,10 @@ export function useFigmaLayout(): FigmaLayout {
     const update = () => {
       const w = window.innerWidth;
       const h = window.innerHeight;
-      const scaleW = w / FIGMA_WIDTH;
-      const scaleH = h / FIGMA_HEIGHT;
-      const compact = w < COMPACT_MAX_WIDTH || h < COMPACT_MAX_HEIGHT;
 
+      const compact = w < COMPACT_MAX_WIDTH || h < COMPACT_MAX_HEIGHT;
       if (compact) {
-        const scale = scaleW;
+        const scale = w / FIGMA_WIDTH;
         setLayout({
           scale,
           compact: true,
@@ -39,6 +37,8 @@ export function useFigmaLayout(): FigmaLayout {
           scaledHeight: FIGMA_HEIGHT * scale,
         });
       } else {
+        const scaleW = w / FIGMA_WIDTH;
+        const scaleH = h / FIGMA_HEIGHT;
         const scale = Math.min(scaleW, scaleH);
         setLayout({
           scale,
@@ -57,9 +57,9 @@ export function useFigmaLayout(): FigmaLayout {
   return layout;
 }
 
-export function useFigmaCompactClass(compact: boolean) {
+export function useFigmaCompactClass(active: boolean) {
   useEffect(() => {
-    document.documentElement.classList.toggle("dashboard-compact", compact);
+    document.documentElement.classList.toggle("dashboard-compact", active);
     return () => document.documentElement.classList.remove("dashboard-compact");
-  }, [compact]);
+  }, [active]);
 }

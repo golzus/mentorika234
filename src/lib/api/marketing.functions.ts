@@ -1,5 +1,10 @@
 import { supabase } from "@/lib/db/client";
-import type { MarketingCategory, MarketingGoalInsert, MarketingGoalUpdate, ActionItem } from "@/lib/db/schemas";
+import type {
+  MarketingCategory,
+  MarketingGoalInsert,
+  MarketingGoalUpdate,
+  ActionItem,
+} from "@/lib/db/schemas";
 
 export async function listMarketingGoals(userId: string, category?: MarketingCategory) {
   let query = supabase
@@ -31,7 +36,7 @@ export async function createMarketingGoal(userId: string, input: MarketingGoalIn
 export async function updateMarketingGoal(
   goalId: string,
   userId: string,
-  updates: MarketingGoalUpdate
+  updates: MarketingGoalUpdate,
 ) {
   const { data, error } = await supabase
     .from("marketing_goals")
@@ -55,14 +60,13 @@ export async function deleteMarketingGoal(goalId: string, userId: string) {
   if (error) throw error;
 }
 
-export async function toggleAction(
-  goalId: string,
-  userId: string,
-  actions: ActionItem[]
-) {
+export async function toggleAction(goalId: string, userId: string, actions: ActionItem[]) {
   const { data, error } = await supabase
     .from("marketing_goals")
-    .update({ actions: actions as unknown as import("@/lib/db/database.types").Json, updated_by: userId })
+    .update({
+      actions: actions as unknown as import("@/lib/db/database.types").Json,
+      updated_by: userId,
+    })
     .eq("id", goalId)
     .eq("user_id", userId)
     .select()

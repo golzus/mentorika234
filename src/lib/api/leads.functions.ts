@@ -28,11 +28,7 @@ export async function createLead(userId: string, input: LeadInsert) {
   return data;
 }
 
-export async function updateLead(
-  leadId: string,
-  userId: string,
-  updates: LeadUpdate
-) {
+export async function updateLead(leadId: string, userId: string, updates: LeadUpdate) {
   const { data, error } = await supabase
     .from("leads")
     .update({ ...updates, updated_by: userId })
@@ -46,11 +42,7 @@ export async function updateLead(
 }
 
 export async function deleteLead(leadId: string, userId: string) {
-  const { error } = await supabase
-    .from("leads")
-    .delete()
-    .eq("id", leadId)
-    .eq("user_id", userId);
+  const { error } = await supabase.from("leads").delete().eq("id", leadId).eq("user_id", userId);
 
   if (error) throw error;
 }

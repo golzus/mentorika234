@@ -41,23 +41,16 @@ function LoginPage() {
   if (loading) return null;
 
   return (
-    <div
-      className="flex min-h-screen items-center justify-center bg-[#00b6b5]"
-      dir="rtl"
-    >
+    <div className="flex min-h-screen items-center justify-center bg-[#00b6b5]" dir="rtl">
       <div className="w-full max-w-[420px] rounded-[18px] bg-white px-10 py-12 shadow-[0_20px_60px_rgba(0,0,0,0.2)]">
         <div className="mb-8 text-center">
-          <h1 className="text-[36px] font-extrabold tracking-tight text-[#0d0221]">
-            מנטוריקה
-          </h1>
+          <h1 className="text-[36px] font-extrabold tracking-tight text-[#0d0221]">מנטוריקה</h1>
           <p className="mt-1 text-[16px] text-[#666]">ברוכה הבאה! נא להתחבר</p>
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div>
-            <label className="mb-1 block text-[14px] font-medium text-[#333]">
-              כתובת אימייל
-            </label>
+            <label className="mb-1 block text-[14px] font-medium text-[#333]">כתובת אימייל</label>
             <input
               type="email"
               value={email}
@@ -70,9 +63,7 @@ function LoginPage() {
           </div>
 
           <div>
-            <label className="mb-1 block text-[14px] font-medium text-[#333]">
-              סיסמה
-            </label>
+            <label className="mb-1 block text-[14px] font-medium text-[#333]">סיסמה</label>
             <input
               type="password"
               value={password}

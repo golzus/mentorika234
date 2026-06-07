@@ -8,6 +8,7 @@ export type DashboardSummary = {
   marketingGoalsActive: number;
   marketingGoalsCompleted: number;
   weeklyTasks: { id: string; title: string; category: string; weekly_task: string | null }[];
+  categoryGoals: Record<string, number>;
   profile: {
     first_name: string | null;
     last_name: string | null;
@@ -18,10 +19,7 @@ export type DashboardSummary = {
 
 export async function getDashboardSummary(userId: string): Promise<DashboardSummary> {
   const [leadsRes, marketingRes, profileRes] = await Promise.all([
-    supabase
-      .from("leads")
-      .select("status")
-      .eq("user_id", userId),
+    supabase.from("leads").select("status").eq("user_id", userId),
     supabase
       .from("marketing_goals")
       .select("id, title, category, weekly_task, status")
@@ -39,6 +37,13 @@ export async function getDashboardSummary(userId: string): Promise<DashboardSumm
   const leads = leadsRes.data ?? [];
   const goals = marketingRes.data ?? [];
 
+  const categoryGoals: Record<string, number> = {};
+  for (const g of goals) {
+    if (g.status === "active") {
+      categoryGoals[g.category] = (categoryGoals[g.category] ?? 0) + 1;
+    }
+  }
+
   return {
     leadsTotal: leads.length,
     leadsNew: leads.filter((l) => l.status === "new").length,
@@ -55,6 +60,7 @@ export async function getDashboardSummary(userId: string): Promise<DashboardSumm
         category: g.category,
         weekly_task: g.weekly_task,
       })),
+    categoryGoals,
     profile: profileRes.error ? null : profileRes.data,
   };
 }

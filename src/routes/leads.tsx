@@ -1,12 +1,13 @@
 import { createFileRoute } from "@tanstack/react-router";
-import leadActions from "@/assets/figma/lead-actions.svg";
 import plusIcon from "@/assets/figma/plus-icon.svg";
-import { X, Loader2, Trash2 } from "lucide-react";
+import { X, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { DashboardShell } from "@/components/DashboardShell";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
+import { LeadActionsBar } from "@/components/LeadActionsBar";
 import { useAuth } from "@/lib/auth/auth-context";
 import { useLeads, useCreateLead, useUpdateLead, useDeleteLead } from "@/hooks/use-leads";
-import type { Lead, LeadInsert, LeadStatus } from "@/lib/db/schemas";
+import type { Lead, LeadInsert, LeadStatus, LeadUpdate } from "@/lib/db/schemas";
 
 export const Route = createFileRoute("/leads")({
   head: () => ({
@@ -25,16 +26,11 @@ const STATUS_LABELS: { key: LeadStatus | "all"; label: string }[] = [
   { key: "closed", label: "לידים שנסגרו" },
 ];
 
-const STATUS_HEB: Record<LeadStatus, string> = {
-  new: "חדש",
-  in_progress: 'במו"מ',
-  closed: "נסגר",
-};
-
 function LeadsPage() {
   const { user } = useAuth();
   const [activeFilter, setActiveFilter] = useState<LeadStatus | "all">("all");
-  const [open, setOpen] = useState(false);
+  const [addOpen, setAddOpen] = useState(false);
+  const [editingLead, setEditingLead] = useState<Lead | null>(null);
 
   const { data: allLeads = [], isLoading, isError } = useLeads(user?.id);
   const createLead = useCreateLead(user?.id ?? "");
@@ -42,9 +38,7 @@ function LeadsPage() {
   const deleteLead = useDeleteLead(user?.id ?? "");
 
   const filteredLeads =
-    activeFilter === "all"
-      ? allLeads
-      : allLeads.filter((l) => l.status === activeFilter);
+    activeFilter === "all" ? allLeads : allLeads.filter((l) => l.status === activeFilter);
 
   const counts: Record<string, number> = {
     all: allLeads.length,
@@ -83,15 +77,8 @@ function LeadsPage() {
               </h2>
             </div>
 
-            <div className="flex min-h-0 flex-1 overflow-hidden p-[1.5%]">
-              <div className="relative ml-[2%] flex shrink-0 items-stretch">
-                <div className="w-[5px] rounded-full bg-white shadow-[0_10px_20px_rgba(0,0,0,0.1)]" />
-                {filteredLeads.length > 0 && (
-                  <div className="absolute top-[5%] h-[22%] w-[5px] rounded-full bg-[#f15a48] shadow-[0_10px_20px_rgba(0,0,0,0.1)]" />
-                )}
-              </div>
-
-              <div className="flex min-w-0 flex-1 flex-col justify-start gap-2 overflow-y-auto pl-[1.5%] pt-1">
+            <div className="flex min-h-0 flex-1 overflow-y-auto p-[1.5%]">
+              <div className="flex min-w-0 flex-1 flex-col justify-start gap-3 pt-1">
                 {isLoading && (
                   <div className="flex flex-1 items-center justify-center">
                     <Loader2 className="h-8 w-8 animate-spin text-[#00b6b5]" />
@@ -112,6 +99,7 @@ function LeadsPage() {
                     key={lead.id}
                     lead={lead}
                     highlight={i === 0}
+                    onEdit={() => setEditingLead(lead)}
                     onDelete={() => deleteLead.mutate(lead.id)}
                     onStatusChange={(status) =>
                       updateLead.mutate({ leadId: lead.id, updates: { status } })
@@ -125,7 +113,7 @@ function LeadsPage() {
           {/* Right action panel */}
           <div className="flex w-[18%] min-w-[170px] flex-col gap-[3%]">
             <button
-              onClick={() => setOpen(true)}
+              onClick={() => setAddOpen(true)}
               className="flex h-[52px] shrink-0 items-center justify-center gap-2 rounded-[8px] bg-[#f15a48] text-[16px] font-bold text-white shadow-[0_4px_10px_rgba(241,90,72,0.35)] transition-opacity hover:opacity-90"
             >
               <span className="flex h-7 w-7 items-center justify-center rounded-[4px] border-2 border-white">
@@ -149,13 +137,30 @@ function LeadsPage() {
         </div>
       </div>
 
-      {open && (
-        <NewLeadModal
+      {addOpen && (
+        <LeadModal
+          mode="add"
           userId={user?.id ?? ""}
-          onClose={() => setOpen(false)}
+          onClose={() => setAddOpen(false)}
           onSave={async (input) => {
-            await createLead.mutateAsync(input);
-            setOpen(false);
+            await createLead.mutateAsync(input as LeadInsert);
+            setAddOpen(false);
+          }}
+        />
+      )}
+
+      {editingLead && (
+        <LeadModal
+          mode="edit"
+          lead={editingLead}
+          userId={user?.id ?? ""}
+          onClose={() => setEditingLead(null)}
+          onSave={async (updates) => {
+            await updateLead.mutateAsync({
+              leadId: editingLead.id,
+              updates: updates as LeadUpdate,
+            });
+            setEditingLead(null);
           }}
         />
       )}
@@ -163,75 +168,116 @@ function LeadsPage() {
   );
 }
 
+// ─── LeadRow ──────────────────────────────────────────────────────────────────
+
 function LeadRow({
   lead,
   highlight,
+  onEdit,
   onDelete,
   onStatusChange,
 }: {
   lead: Lead;
   highlight: boolean;
+  onEdit: () => void;
   onDelete: () => void;
   onStatusChange: (status: LeadStatus) => void;
 }) {
+  const [confirmDelete, setConfirmDelete] = useState(false);
+
   return (
-    <div
-      className={`flex h-[39px] shrink-0 items-center gap-[10px] rounded-[5px] bg-white px-[1%] ${
-        highlight
-          ? "shadow-[0_10px_20px_rgba(241,90,72,0.2)]"
-          : "shadow-[0_10px_20px_rgba(0,0,0,0.1)]"
-      }`}
-      dir="ltr"
-    >
-      <img src={leadActions} alt="" className="h-[24px] w-[92px] shrink-0 object-contain" />
-      <div className="h-[19px] w-px shrink-0 bg-[#d9d9d9]" />
-      <div className="min-w-0 flex-1 truncate text-[15px] leading-[25px] text-[#0d0221]" dir="rtl">
-        {lead.source && `${lead.source} | `}
-        {lead.interested_in && `${lead.interested_in} | `}
-        {lead.proposed_price && `${lead.proposed_price} | `}
-        {new Date(lead.created_at).toLocaleDateString("he-IL")}
-      </div>
-      <div className="h-[19px] w-px shrink-0 bg-[#d9d9d9]" />
-      <div className="shrink-0 text-[16px] font-bold leading-[25px] text-[#0d0221]">{lead.name}</div>
-      <div className="h-[19px] w-px shrink-0 bg-[#d9d9d9]" />
-      <select
-        value={lead.status}
-        onChange={(e) => onStatusChange(e.target.value as LeadStatus)}
-        className="shrink-0 rounded bg-transparent text-[12px] text-[#666] outline-none"
-        dir="rtl"
+    <>
+      <div
+        className={`flex h-[56px] shrink-0 items-center gap-[14px] rounded-[6px] bg-white px-[1.5%] ${
+          highlight
+            ? "shadow-[0_10px_20px_rgba(241,90,72,0.2)]"
+            : "shadow-[0_10px_20px_rgba(0,0,0,0.1)]"
+        }`}
+        dir="ltr"
       >
-        <option value="new">חדש</option>
-        <option value="in_progress">במו&quot;מ</option>
-        <option value="closed">נסגר</option>
-      </select>
-      <button onClick={onDelete} className="shrink-0 text-[#ccc] hover:text-red-400">
-        <Trash2 className="h-3.5 w-3.5" />
-      </button>
-    </div>
+        <LeadActionsBar
+          phone={lead.phone}
+          email={lead.email}
+          onEdit={onEdit}
+          onDelete={() => setConfirmDelete(true)}
+        />
+
+        <div className="h-[28px] w-px shrink-0 bg-[#d9d9d9]" />
+
+        <div
+          className="min-w-0 flex-1 truncate text-[20px] leading-[30px] text-[#0d0221]"
+          dir="rtl"
+        >
+          {[
+            lead.source,
+            lead.interested_in,
+            lead.proposed_price,
+            new Date(lead.created_at).toLocaleDateString("he-IL"),
+          ]
+            .filter(Boolean)
+            .join(" | ")}
+        </div>
+
+        <div className="h-[28px] w-px shrink-0 bg-[#d9d9d9]" />
+        <div className="shrink-0 text-[22px] font-bold leading-[30px] text-[#0d0221]">
+          {lead.name}
+        </div>
+        <div className="h-[28px] w-px shrink-0 bg-[#d9d9d9]" />
+
+        <select
+          value={lead.status}
+          onChange={(e) => onStatusChange(e.target.value as LeadStatus)}
+          className="shrink-0 rounded bg-transparent text-[18px] leading-[26px] text-[#666] outline-none"
+          dir="rtl"
+        >
+          <option value="new">חדש</option>
+          <option value="in_progress">במו&quot;מ</option>
+          <option value="closed">נסגר</option>
+        </select>
+      </div>
+
+      {confirmDelete && (
+        <ConfirmDialog
+          onConfirm={() => {
+            setConfirmDelete(false);
+            onDelete();
+          }}
+          onCancel={() => setConfirmDelete(false)}
+        />
+      )}
+    </>
   );
 }
 
-function NewLeadModal({
-  userId,
+// ─── LeadModal (add + edit) ───────────────────────────────────────────────────
+
+function LeadModal({
+  mode,
+  lead,
   onClose,
   onSave,
 }: {
+  mode: "add" | "edit";
+  lead?: Lead;
   userId: string;
   onClose: () => void;
-  onSave: (input: LeadInsert) => Promise<void>;
+  onSave: (data: Partial<LeadInsert>) => Promise<void>;
 }) {
-  const [name, setName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [email, setEmail] = useState("");
-  const [source, setSource] = useState("");
-  const [interestedIn, setInterestedIn] = useState("");
-  const [proposedPrice, setProposedPrice] = useState("");
-  const [notes, setNotes] = useState("");
+  const [name, setName] = useState(lead?.name ?? "");
+  const [phone, setPhone] = useState(lead?.phone ?? "");
+  const [email, setEmail] = useState(lead?.email ?? "");
+  const [source, setSource] = useState(lead?.source ?? "");
+  const [interestedIn, setInterestedIn] = useState(lead?.interested_in ?? "");
+  const [proposedPrice, setProposedPrice] = useState(lead?.proposed_price ?? "");
+  const [notes, setNotes] = useState(lead?.notes ?? "");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
   const save = async () => {
-    if (!name.trim()) { setError("שם הליד חובה"); return; }
+    if (!name.trim()) {
+      setError("שם הליד חובה");
+      return;
+    }
     setError("");
     setSaving(true);
     try {
@@ -243,7 +289,7 @@ function NewLeadModal({
         interested_in: interestedIn || undefined,
         proposed_price: proposedPrice || undefined,
         notes: notes || undefined,
-        status: "new",
+        ...(mode === "add" ? { status: "new" as LeadStatus } : {}),
       });
     } catch {
       setError("שגיאה בשמירה, נסי שוב");
@@ -269,7 +315,9 @@ function NewLeadModal({
           <X className="h-4 w-4" />
         </button>
 
-        <h2 className="mb-7 text-center text-[20px] font-bold text-[#222]">הוספת ליד חדש</h2>
+        <h2 className="mb-7 text-center text-[20px] font-bold text-[#222]">
+          {mode === "add" ? "הוספת ליד חדש" : `עריכת ליד — ${lead?.name}`}
+        </h2>
 
         <div className="grid grid-cols-3 gap-4">
           <LeadField label="שם *" value={name} onChange={setName} />
@@ -298,7 +346,7 @@ function NewLeadModal({
             disabled={saving}
             className="h-[42px] rounded-[8px] bg-[#f15a48] px-8 text-[15px] font-bold text-white shadow-[0_4px_10px_rgba(255,107,87,0.35)] disabled:opacity-60"
           >
-            {saving ? "שומר..." : "הוספת ליד"}
+            {saving ? "שומר..." : mode === "add" ? "הוספת ליד" : "שמירת שינויים"}
           </button>
         </div>
       </div>
@@ -306,7 +354,15 @@ function NewLeadModal({
   );
 }
 
-function LeadField({ label, value, onChange }: { label: string; value: string; onChange: (v: string) => void }) {
+function LeadField({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (v: string) => void;
+}) {
   return (
     <div className="relative rounded-[10px] border border-[#d0d0d0] bg-white px-3 py-3 shadow-[0_1px_3px_rgba(0,0,0,0.04)]">
       <input

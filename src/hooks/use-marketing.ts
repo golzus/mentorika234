@@ -6,7 +6,13 @@ import {
   deleteMarketingGoal,
   toggleAction,
 } from "@/lib/api/marketing.functions";
-import type { ActionItem, MarketingCategory, MarketingGoal, MarketingGoalInsert, MarketingGoalUpdate } from "@/lib/db/schemas";
+import type {
+  ActionItem,
+  MarketingCategory,
+  MarketingGoal,
+  MarketingGoalInsert,
+  MarketingGoalUpdate,
+} from "@/lib/db/schemas";
 
 export function useMarketingGoals(userId: string | undefined, category?: MarketingCategory) {
   return useQuery({

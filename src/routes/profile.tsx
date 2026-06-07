@@ -110,19 +110,23 @@ function ProfilePage() {
         <div className="min-h-0 flex-1">
           {step === 1 && (
             <IntroStep
-              firstName={firstName} setFirstName={setFirstName}
-              lastName={lastName} setLastName={setLastName}
-              businessName={businessName} setBusinessName={setBusinessName}
-              slogan={slogan} setSlogan={setSlogan}
+              firstName={firstName}
+              setFirstName={setFirstName}
+              lastName={lastName}
+              setLastName={setLastName}
+              businessName={businessName}
+              setBusinessName={setBusinessName}
+              slogan={slogan}
+              setSlogan={setSlogan}
             />
           )}
-          {step === 2 && (
-            <BusinessStep gc={gc} setGc={setGc} />
-          )}
+          {step === 2 && <BusinessStep gc={gc} setGc={setGc} />}
           {step === 3 && (
             <FinancialStep
-              salary={salary} setSalary={setSalary}
-              newClients={newClients} setNewClients={setNewClients}
+              salary={salary}
+              setSalary={setSalary}
+              newClients={newClients}
+              setNewClients={setNewClients}
             />
           )}
         </div>
@@ -151,35 +155,52 @@ function stepStatus(n: number, current: number): "completed" | "active" | "upcom
 }
 
 function IntroStep({
-  firstName, setFirstName,
-  lastName, setLastName,
-  businessName, setBusinessName,
-  slogan, setSlogan,
+  firstName,
+  setFirstName,
+  lastName,
+  setLastName,
+  businessName,
+  setBusinessName,
+  slogan,
+  setSlogan,
 }: {
-  firstName: string; setFirstName: (v: string) => void;
-  lastName: string; setLastName: (v: string) => void;
-  businessName: string; setBusinessName: (v: string) => void;
-  slogan: string; setSlogan: (v: string) => void;
+  firstName: string;
+  setFirstName: (v: string) => void;
+  lastName: string;
+  setLastName: (v: string) => void;
+  businessName: string;
+  setBusinessName: (v: string) => void;
+  slogan: string;
+  setSlogan: (v: string) => void;
 }) {
   return (
     <div className="grid h-full grid-cols-2 gap-x-[24px] gap-y-[16px]" dir="rtl">
-      <QACard question="אז מי את?" value={firstName} onChange={setFirstName} tint placeholder="שם פרטי" />
+      <QACard
+        question="אז מי את?"
+        value={firstName}
+        onChange={setFirstName}
+        tint
+        placeholder="שם פרטי"
+      />
       <QACard question="שם משפחה" value={lastName} onChange={setLastName} placeholder="שם משפחה" />
-      <QACard question="איך קוראים לעסק שלך?" value={businessName} onChange={setBusinessName} placeholder="שם העסק" />
-      <QACard question="הסלוגן שלי" value={slogan} onChange={setSlogan} placeholder="סלוגן / תיאור קצר" />
+      <QACard
+        question="איך קוראים לעסק שלך?"
+        value={businessName}
+        onChange={setBusinessName}
+        placeholder="שם העסק"
+      />
+      <QACard
+        question="הסלוגן שלי"
+        value={slogan}
+        onChange={setSlogan}
+        placeholder="סלוגן / תיאור קצר"
+      />
     </div>
   );
 }
 
-function BusinessStep({
-  gc,
-  setGc,
-}: {
-  gc: GoldenCircle;
-  setGc: (v: GoldenCircle) => void;
-}) {
-  const update = (key: keyof GoldenCircle) => (val: string) =>
-    setGc({ ...gc, [key]: val });
+function BusinessStep({ gc, setGc }: { gc: GoldenCircle; setGc: (v: GoldenCircle) => void }) {
+  const update = (key: keyof GoldenCircle) => (val: string) => setGc({ ...gc, [key]: val });
 
   return (
     <div className="grid h-full grid-cols-2 gap-x-[24px] gap-y-[16px]" dir="rtl">
@@ -212,11 +233,15 @@ function BusinessStep({
 }
 
 function FinancialStep({
-  salary, setSalary,
-  newClients, setNewClients,
+  salary,
+  setSalary,
+  newClients,
+  setNewClients,
 }: {
-  salary: string; setSalary: (v: string) => void;
-  newClients: string; setNewClients: (v: string) => void;
+  salary: string;
+  setSalary: (v: string) => void;
+  newClients: string;
+  setNewClients: (v: string) => void;
 }) {
   return (
     <div className="grid h-full grid-cols-2 gap-x-[24px] gap-y-[16px]" dir="rtl">
@@ -236,7 +261,15 @@ function FinancialStep({
   );
 }
 
-function StepCircle({ n, status, onClick }: { n: number; status: "completed" | "active" | "upcoming"; onClick: () => void }) {
+function StepCircle({
+  n,
+  status,
+  onClick,
+}: {
+  n: number;
+  status: "completed" | "active" | "upcoming";
+  onClick: () => void;
+}) {
   return (
     <button
       type="button"
@@ -261,7 +294,17 @@ function StepLine({ completed }: { completed?: boolean }) {
 const fieldBaseClass =
   "w-full border-0 bg-transparent text-center text-[18px] text-[#222] outline-none ring-0 focus:outline-none focus:ring-0";
 
-function PromptCard({ question, prompt, value, onChange }: { question: string; prompt: string; value: string; onChange: (value: string) => void }) {
+function PromptCard({
+  question,
+  prompt,
+  value,
+  onChange,
+}: {
+  question: string;
+  prompt: string;
+  value: string;
+  onChange: (value: string) => void;
+}) {
   return (
     <div className="flex flex-col overflow-hidden rounded-[10px] border border-[#e7e7e7] bg-white shadow-[0_4px_12px_rgba(0,0,0,0.06)]">
       <div className="flex shrink-0 min-h-[40px] items-center justify-center bg-[#00b6b5] px-4 py-2 text-center text-[18px] font-bold text-[#0d0221]">
@@ -280,13 +323,29 @@ function PromptCard({ question, prompt, value, onChange }: { question: string; p
   );
 }
 
-function QACard({ question, value, onChange, tint, dir: dirProp, placeholder }: { question: string; value: string; onChange: (value: string) => void; tint?: boolean; dir?: "ltr" | "rtl"; placeholder?: string }) {
+function QACard({
+  question,
+  value,
+  onChange,
+  tint,
+  dir: dirProp,
+  placeholder,
+}: {
+  question: string;
+  value: string;
+  onChange: (value: string) => void;
+  tint?: boolean;
+  dir?: "ltr" | "rtl";
+  placeholder?: string;
+}) {
   return (
     <div className="flex flex-col overflow-hidden rounded-[10px] border border-[#e7e7e7] bg-white shadow-[0_4px_12px_rgba(0,0,0,0.06)]">
       <div className="flex h-[40px] shrink-0 items-center justify-center bg-[#00b6b5] text-[18px] font-bold text-[#0d0221]">
         {question}
       </div>
-      <div className={`flex flex-1 items-center justify-center px-4 ${tint ? "bg-[#fff1ee]" : "bg-white"}`}>
+      <div
+        className={`flex flex-1 items-center justify-center px-4 ${tint ? "bg-[#fff1ee]" : "bg-white"}`}
+      >
         <input
           type="text"
           value={value}

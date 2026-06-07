@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Plus, X, Calendar, ChevronDown, Pencil, Trash2, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { DashboardShell } from "@/components/DashboardShell";
+import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { useAuth } from "@/lib/auth/auth-context";
 import {
   useMarketingGoals,
@@ -22,17 +23,13 @@ export const Route = createFileRoute("/marketing")({
   component: MarketingPage,
 });
 
-const tabs: MarketingCategory[] = [
-  "בניית תשתיות",
-  "המלצות",
-  "שימור",
-  'שתפ"ם',
-  "חשיפה",
-  "מכירות",
-];
+const tabs: MarketingCategory[] = ["בניית תשתיות", "המלצות", "שימור", 'שתפ"ם', "חשיפה", "מכירות"];
 
 const categoryTitles: Record<MarketingCategory, { title: string; subtitle: string }> = {
-  מכירות: { title: "מכירות יזומות מול הלקוח הפוטנציאלי", subtitle: "מכירות יזומות מול הלקוח הפוטנציאלי" },
+  מכירות: {
+    title: "מכירות יזומות מול הלקוח הפוטנציאלי",
+    subtitle: "מכירות יזומות מול הלקוח הפוטנציאלי",
+  },
   חשיפה: { title: "חשיפה מול הלקוח הפוטנציאלי", subtitle: "פרונטלית / פרינטית / דיגיטלית" },
   'שתפ"ם': { title: "שיתופי פעולה והפניות", subtitle: "הפניות ושיתופי פעולה" },
   שימור: { title: "שימור לקוחות קיימים", subtitle: "מתנות ומעקב שביעות רצון לקוח" },
@@ -47,6 +44,7 @@ function MarketingPage() {
 
   const { data: goals = [], isLoading, isError } = useMarketingGoals(user?.id, activeTab);
   const deleteGoal = useDeleteMarketingGoal(user?.id ?? "");
+  const updateGoal = useUpdateMarketingGoal(user?.id ?? "");
   const toggleAction = useToggleAction(user?.id ?? "");
 
   const { title, subtitle } = categoryTitles[activeTab];
@@ -143,6 +141,12 @@ function MarketingPage() {
                       key={goal.id}
                       goal={goal}
                       onDelete={() => deleteGoal.mutate(goal.id)}
+                      onToggleStatus={() =>
+                        updateGoal.mutate({
+                          goalId: goal.id,
+                          updates: { status: goal.status === "active" ? "completed" : "active" },
+                        })
+                      }
                       onToggleAction={(actions) =>
                         toggleAction.mutate({ goalId: goal.id, actions })
                       }
@@ -169,45 +173,75 @@ function MarketingPage() {
 function GoalCard({
   goal,
   onDelete,
+  onToggleStatus,
   onToggleAction,
 }: {
   goal: MarketingGoal;
   onDelete: () => void;
+  onToggleStatus: () => void;
   onToggleAction: (actions: ActionItem[]) => void;
 }) {
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const actions = (goal.actions as ActionItem[] | null) ?? [];
   const done = actions.filter((a) => a.done).length;
   const color = goal.status === "completed" ? "#008f15" : "#f15a48";
+  const isCompleted = goal.status === "completed";
 
   return (
-    <div className="flex h-auto min-h-[54px] flex-col gap-1 rounded-[10px] border border-[#eee] bg-white px-4 py-3 shadow-[0_2px_6px_rgba(0,0,0,0.05)]">
-      <div className="flex items-center gap-3">
-        <div className="shrink-0 rounded-full border-2" style={{ width: 18, height: 18, borderColor: color }} />
-        <div className="min-w-0 flex-1 text-right">
-          <div className="truncate text-[16px] font-bold leading-tight" style={{ color }}>
-            {goal.title}
-          </div>
-          {goal.target_date && (
-            <div className="mt-0.5 text-[12px] leading-tight text-[#888]">
-              יעד: {goal.target_date}
+    <>
+      <div className="flex h-auto min-h-[54px] flex-col gap-1 rounded-[10px] border border-[#eee] bg-white px-4 py-3 shadow-[0_2px_6px_rgba(0,0,0,0.05)]">
+        <div className="flex items-center gap-3">
+          <button
+            onClick={onToggleStatus}
+            title={isCompleted ? "סמן כפעיל" : "סמן כהושלם"}
+            className="shrink-0 rounded-full border-2 transition-transform hover:scale-110"
+            style={{
+              width: 18,
+              height: 18,
+              borderColor: color,
+              backgroundColor: isCompleted ? color : "transparent",
+            }}
+          />
+          <div className="min-w-0 flex-1 text-right">
+            <div className="truncate text-[16px] font-bold leading-tight" style={{ color }}>
+              {goal.title}
             </div>
-          )}
+            {goal.target_date && (
+              <div className="mt-0.5 text-[12px] leading-tight text-[#888]">
+                יעד: {goal.target_date}
+              </div>
+            )}
+          </div>
+          <div className="flex items-center gap-1.5">
+            {actions.length > 0 && (
+              <span className="text-[11px] text-[#888]">
+                {done}/{actions.length}
+              </span>
+            )}
+            <button
+              onClick={() => setConfirmDelete(true)}
+              title="מחיקת משימה"
+              className="text-[#ccc] hover:text-red-400"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+            </button>
+          </div>
         </div>
-        <div className="flex items-center gap-1.5">
-          {actions.length > 0 && (
-            <span className="text-[11px] text-[#888]">{done}/{actions.length}</span>
-          )}
-          <button onClick={onDelete} className="text-[#ccc] hover:text-red-400">
-            <Trash2 className="h-3.5 w-3.5" />
-          </button>
-        </div>
+        {goal.weekly_task && (
+          <div className="text-right text-[12px] text-[#666]">שבועי: {goal.weekly_task}</div>
+        )}
       </div>
-      {goal.weekly_task && (
-        <div className="text-right text-[12px] text-[#666]">
-          שבועי: {goal.weekly_task}
-        </div>
+
+      {confirmDelete && (
+        <ConfirmDialog
+          onConfirm={() => {
+            setConfirmDelete(false);
+            onDelete();
+          }}
+          onCancel={() => setConfirmDelete(false)}
+        />
       )}
-    </div>
+    </>
   );
 }
 
@@ -315,7 +349,9 @@ function NewGoalModal({
                   onChange={(e) => setCategory(e.target.value as MarketingCategory)}
                   className="w-full appearance-none bg-transparent text-center text-[14px] outline-none"
                 >
-                  {tabs.map((t) => <option key={t}>{t}</option>)}
+                  {tabs.map((t) => (
+                    <option key={t}>{t}</option>
+                  ))}
                 </select>
               </div>
             </FieldHeader>
@@ -327,10 +363,16 @@ function NewGoalModal({
             </div>
             <div className="px-3 py-2">
               {actions.map((a, i) => (
-                <div key={i} className="flex items-center justify-between border-b border-[#f0f0f0] py-1.5 last:border-0">
+                <div
+                  key={i}
+                  className="flex items-center justify-between border-b border-[#f0f0f0] py-1.5 last:border-0"
+                >
                   <div className="flex items-center gap-2 text-[12px] text-[#888]">
                     <Pencil className="h-3 w-3" />
-                    <Trash2 className="h-3 w-3 cursor-pointer hover:text-red-400" onClick={() => setActions(actions.filter((_, j) => j !== i))} />
+                    <Trash2
+                      className="h-3 w-3 cursor-pointer hover:text-red-400"
+                      onClick={() => setActions(actions.filter((_, j) => j !== i))}
+                    />
                   </div>
                   <input
                     value={a}
@@ -389,7 +431,15 @@ function FieldHeader({ label, children }: { label: string; children: React.React
   );
 }
 
-function TicksGauge({ value, max, lines }: { value: number; max: number; lines: [string, string] }) {
+function TicksGauge({
+  value,
+  max,
+  lines,
+}: {
+  value: number;
+  max: number;
+  lines: [string, string];
+}) {
   const size = 260;
   const cx = size / 2;
   const cy = size / 2;
@@ -408,9 +458,15 @@ function TicksGauge({ value, max, lines }: { value: number; max: number; lines: 
           const x2 = cx + Math.cos(angle) * rOuter;
           const y2 = cy + Math.sin(angle) * rOuter;
           return (
-            <line key={i} x1={x1} y1={y1} x2={x2} y2={y2}
+            <line
+              key={i}
+              x1={x1}
+              y1={y1}
+              x2={x2}
+              y2={y2}
               stroke={i < filledTicks ? "#f15a48" : "#cfeeee"}
-              strokeWidth={9} strokeLinecap="round"
+              strokeWidth={9}
+              strokeLinecap="round"
             />
           );
         })}

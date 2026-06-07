@@ -71,6 +71,31 @@
   --panel: #ffffff;
 }
 
+/* Global custom scrollbar - orange thumb on transparent track */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #f15a48 transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 50px;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: #f15a48;
+  border-radius: 50px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: #d94e3e;
+}
+
 @layer base {
   * { border-color: var(--color-border); }
   html, body {
