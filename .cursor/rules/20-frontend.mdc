@@ -1,0 +1,35 @@
+---
+description: Frontend — RTL, shadcn, 4 states, responsive, עברית
+globs: "**/*.tsx"
+alwaysApply: false
+---
+
+# Frontend
+
+## UI
+
+- **עברית בלבד** · **RTL** (`dir="rtl"`)
+- shadcn/ui **לפני** custom components
+- `DashboardShell` — wrapper לכל דף Phase 1
+- Icons: lucide-react · Forms: react-hook-form + zod
+
+## 4 States חובה
+
+Loading · Error · Empty · Validation — בכל Feature
+
+## Performance
+
+- Pagination/Limit לרשימות
+- אין טעינת נתונים מיותרת
+
+## Responsive + RTL
+
+בדיקה במסך קטן + RTL לפני DONE
+
+## Design Tokens
+
+`src/styles.css` — teal, coral, Heebo. Figma כמקור.
+
+## Phase 2
+
+אין UI ל-Ongoing/Payments/Retention/Control Room.

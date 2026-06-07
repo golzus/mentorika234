@@ -1,0 +1,36 @@
+---
+description: Backend — Server Functions, Supabase server-side, env vars
+globs: "**/*.server.ts,**/api/**"
+alwaysApply: false
+---
+
+# Backend
+
+## Server Functions
+
+- `createServerFn` ב-`src/lib/api/*.functions.ts`
+- **כל function** — בדיקת משתמש מחובר
+- **כל input** — Zod validation
+- **כל CRUD** — וידוא בעלות user_id
+
+## Supabase
+
+- Client server-side בלבד ל-service_role
+- Anon key ב-client (VITE_*)
+
+## Environment
+
+- Secrets: `.env` בלבד
+- Client: `VITE_*` בלבד
+- `service_role` — **server only**
+- אין hardcoded keys/tokens/passwords
+
+## Queries
+
+- אין SELECT * מיותר
+- Pagination/limit לרשימות
+- תמיד filter לפי user_id
+
+## Phase 1 API
+
+profile · marketing · leads · dashboard · auth

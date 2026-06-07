@@ -1,0 +1,39 @@
+---
+description: Database — Supabase, RLS, migrations, audit fields, Phase 1 only
+globs: "**/db/**,**/supabase/**,**/api/**"
+alwaysApply: false
+---
+
+# Database
+
+## Phase 1 Tables (מותר)
+
+`profiles` · `marketing_goals` · `leads`
+
+## Phase 2 (אסור ליצור)
+
+`projects` · `payments` · `retention_clients`
+
+## כל טבלה חייבת
+
+- Types + Zod Validation
+- Foreign Keys + Indexes
+- `created_at` · `updated_at`
+- `created_by` · `updated_by` (רלוונטי)
+- **RLS פעיל**
+
+## RLS
+
+- כל שאילתה עם user_id
+- `auth.uid() = user_id`
+
+## Migrations
+
+- שינוי Schema → Supabase Migration בלבד
+- תיעוד ב-docs/DB.md + שם ברור
+- גיבוי לפני Migration משמעותי
+- אין מחיקת עמודות/טבלאות ללא אישור
+
+## אין
+
+MongoDB · Firebase · שינוי ידני ב-Production

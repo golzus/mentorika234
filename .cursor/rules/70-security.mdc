@@ -1,0 +1,33 @@
+---
+description: Security — RLS, Auth, Zod, env vars, Security Gate
+alwaysApply: true
+---
+
+# Security (חובה)
+
+## Supabase
+
+- Auth חובה · RLS בכל טבלה
+- Authorization בשרת/RLS **בלבד** — Frontend checks ≠ אבטחה
+- שאילתות עם user_id בלבד
+- כל Server Function — בדיקת משתמש מחובר
+- כל CRUD — וידוא בעלות
+
+## Secrets
+
+- `.env` בלבד — אין hardcoded keys/tokens/passwords
+- `VITE_*` client · `service_role` server only
+- אין PII ב-logs
+
+## Validation
+
+- כל input → Zod validation
+
+## Security Gate
+
+לפני DONE — Security Reviewer חייב Approved.
+Not Approved → IN_PROGRESS.
+
+## אין
+
+MongoDB · Firebase · service_role ב-client

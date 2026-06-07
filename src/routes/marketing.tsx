@@ -1,7 +1,16 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { Plus, X, Calendar, ChevronDown, Pencil, Trash2 } from "lucide-react";
+import { Plus, X, Calendar, ChevronDown, Pencil, Trash2, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { DashboardShell } from "@/components/DashboardShell";
+import { useAuth } from "@/lib/auth/auth-context";
+import {
+  useMarketingGoals,
+  useCreateMarketingGoal,
+  useDeleteMarketingGoal,
+  useUpdateMarketingGoal,
+  useToggleAction,
+} from "@/hooks/use-marketing";
+import type { MarketingCategory, MarketingGoal, ActionItem } from "@/lib/db/schemas";
 
 export const Route = createFileRoute("/marketing")({
   head: () => ({
@@ -13,136 +22,228 @@ export const Route = createFileRoute("/marketing")({
   component: MarketingPage,
 });
 
-const tabs = [
-  { label: "בניית תשתיות" },
-  { label: "המלצות" },
-  { label: "שימור" },
-  { label: 'שתפ"ם' },
-  { label: "חשיפה" },
-  { label: "מכירות", active: true },
+const tabs: MarketingCategory[] = [
+  "בניית תשתיות",
+  "המלצות",
+  "שימור",
+  'שתפ"ם',
+  "חשיפה",
+  "מכירות",
 ];
 
-type Task = { title: string; time: string };
+const categoryTitles: Record<MarketingCategory, { title: string; subtitle: string }> = {
+  מכירות: { title: "מכירות יזומות מול הלקוח הפוטנציאלי", subtitle: "מכירות יזומות מול הלקוח הפוטנציאלי" },
+  חשיפה: { title: "חשיפה מול הלקוח הפוטנציאלי", subtitle: "פרונטלית / פרינטית / דיגיטלית" },
+  'שתפ"ם': { title: "שיתופי פעולה והפניות", subtitle: "הפניות ושיתופי פעולה" },
+  שימור: { title: "שימור לקוחות קיימים", subtitle: "מתנות ומעקב שביעות רצון לקוח" },
+  המלצות: { title: "איסוף המלצות מלקוחות מרוצים", subtitle: "איסוף המלצות מלקוחות מרוצים" },
+  "בניית תשתיות": { title: "בניית תשתיות שיווקיות", subtitle: "פיתוח כלים ותהליכים שיווקיים" },
+};
 
 function MarketingPage() {
-  const [tasks, setTasks] = useState<Task[]>(
-    Array.from({ length: 8 }, () => ({ title: "עדכון אחד", time: "היום 09:00 PM" })),
-  );
+  const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState<MarketingCategory>("מכירות");
   const [open, setOpen] = useState(false);
 
-  const addTask = (t: Task) => {
-    setTasks((prev) => [...prev, t]);
-    setOpen(false);
-  };
+  const { data: goals = [], isLoading, isError } = useMarketingGoals(user?.id, activeTab);
+  const deleteGoal = useDeleteMarketingGoal(user?.id ?? "");
+  const toggleAction = useToggleAction(user?.id ?? "");
+
+  const { title, subtitle } = categoryTitles[activeTab];
+  const activeGoals = goals.filter((g) => g.status === "active");
+  const totalActive = activeGoals.length;
 
   return (
-    <DashboardShell active="מעקב שיווק">
-      <div
-        className="mb-[18px] flex items-stretch overflow-hidden rounded-[10px] border border-[#e7e7e7] bg-white shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
-        dir="ltr"
-      >
-        {tabs.map((t, i) => {
-          if (t.active) {
-            return (
-              <div
-                key={t.label}
-                className="flex h-[44px] flex-1 items-center justify-center rounded-[8px] bg-coral text-[18px] font-bold text-white"
-              >
-                {t.label}
-              </div>
-            );
-          }
-          return (
-            <div
-              key={t.label}
-              className={`flex h-[44px] flex-1 items-center justify-center text-[17px] font-medium text-[#444] ${
-                i === 0 ? "" : "border-l border-[#f0c8c0]"
-              }`}
-            >
-              {t.label}
-            </div>
-          );
-        })}
-      </div>
-
-      <div className="grid grid-cols-[1fr_460px] gap-[28px]" dir="ltr">
-        <section className="rounded-[10px] border border-[#e7e7e7] bg-white p-[22px] shadow-[0_7px_18px_rgba(0,0,0,0.06)]">
-          <div className="mb-[14px] flex items-start justify-between" dir="rtl">
-            <div>
-              <h2 className="text-[26px] font-bold leading-tight text-[#222]">
-                מכירות יזומות מול הלקוח הפוטנציאלי
-              </h2>
-              <p className="mt-1 text-[13px] text-[#666]">
-                מכירות יזומות מול הלקוח הפוטנציאלי
-              </p>
-            </div>
-            <button
-              onClick={() => setOpen(true)}
-              className="flex h-[44px] items-center gap-2 rounded-[8px] bg-coral px-4 text-[16px] font-bold text-white shadow-[0_4px_10px_rgba(255,107,87,0.35)]"
-            >
-              <Plus className="h-5 w-5" />
-              משימה חדשה
-            </button>
-          </div>
-
-          <div className="grid grid-cols-2 gap-x-[18px] gap-y-[12px]" dir="rtl">
-            {tasks.map((t, i) => (
-              <div
-                key={i}
-                className="flex h-[58px] items-center justify-between rounded-[10px] border border-[#eee] bg-white px-4 shadow-[0_2px_6px_rgba(0,0,0,0.05)]"
-              >
-                <div className="text-right">
-                  <div className="text-[17px] font-bold leading-tight text-coral">{t.title}</div>
-                  <div className="text-[12px] leading-tight text-coral">{t.time}</div>
-                </div>
-                <div
-                  className="rounded-full border-2"
-                  style={{ width: 20, height: 20, borderColor: "#ff6b57" }}
-                />
-              </div>
-            ))}
-          </div>
-        </section>
-
-        <aside
-          className="flex flex-col items-center rounded-[10px] border border-[#e7e7e7] bg-white px-6 py-8 text-center shadow-[0_7px_18px_rgba(0,0,0,0.06)]"
-          dir="rtl"
+    <DashboardShell active="מעקב שיווק" breadcrumb="מעקב שיווק">
+      <div className="flex h-full flex-col">
+        {/* ── Tab bar ──────────────────────────────────────────── */}
+        <div
+          className="mb-[14px] flex shrink-0 items-stretch overflow-hidden rounded-[10px] border border-[#e7e7e7] bg-white shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
+          dir="ltr"
         >
-          <h3 className="text-[26px] font-bold leading-tight text-[#222]">
-            כבר כמעט הגעת ליעד.
-          </h3>
-          <h3 className="text-[26px] font-bold leading-tight text-[#222]">כל הכבוד!</h3>
+          {tabs.map((label, i) => {
+            const isActive = label === activeTab;
+            return (
+              <button
+                key={label}
+                type="button"
+                onClick={() => setActiveTab(label)}
+                className={`flex h-[40px] flex-1 cursor-pointer items-center justify-center text-[17px] font-medium transition-colors ${
+                  isActive
+                    ? "rounded-[8px] bg-[#f15a48] font-bold text-white"
+                    : `text-[#444] hover:bg-[#fafafa] ${i === 0 ? "" : "border-l border-[#f0c8c0]"}`
+                }`}
+              >
+                {label}
+              </button>
+            );
+          })}
+        </div>
 
-          <div className="mt-8">
-            <TicksGauge value={100} max={200} />
-          </div>
-        </aside>
+        {/* ── Main two-panel layout ────────────────────────────── */}
+        <div className="grid min-h-0 flex-1 grid-cols-[35%_1fr] gap-[22px]" dir="ltr">
+          {/* Left: gauge panel */}
+          <aside
+            className="flex flex-col items-center justify-center gap-[16px] overflow-hidden rounded-[10px] border border-[#e7e7e7] bg-white px-6 py-6 text-center shadow-[0_7px_18px_rgba(0,0,0,0.06)]"
+            dir="rtl"
+          >
+            <h3 className="text-[24px] font-bold leading-snug text-[#222]">
+              {totalActive > 0 ? "יוצאת לשטח!" : "עדיין לא התחלנו"}
+              <br />
+              {totalActive > 0 ? "כל הכבוד!" : "הוסיפי משימה ראשונה"}
+            </h3>
+            <TicksGauge value={totalActive} max={20} lines={[activeTab, "פעילות"]} />
+          </aside>
+
+          {/* Right: tasks panel */}
+          <section
+            className="flex min-h-0 flex-col overflow-hidden rounded-[10px] border border-[#e7e7e7] bg-white shadow-[0_7px_18px_rgba(0,0,0,0.06)]"
+            dir="rtl"
+          >
+            {/* Header */}
+            <div className="flex shrink-0 items-start justify-between p-[18px] pb-[12px]">
+              <button
+                onClick={() => setOpen(true)}
+                className="flex h-[40px] items-stretch overflow-hidden rounded-[8px] bg-[#f15a48] text-[15px] font-bold text-white shadow-[0_4px_10px_rgba(241,90,72,0.35)]"
+              >
+                <span className="flex w-[40px] shrink-0 items-center justify-center bg-[#d94e3e]">
+                  <Plus className="h-4 w-4" />
+                </span>
+                <span className="flex items-center px-4">משימה חדשה</span>
+              </button>
+              <div className="text-right">
+                <h2 className="text-[22px] font-bold leading-snug text-[#222]">{title}</h2>
+                <p className="mt-0.5 text-[13px] text-[#666]">{subtitle}</p>
+              </div>
+            </div>
+
+            {/* States */}
+            {isLoading && (
+              <div className="flex flex-1 items-center justify-center">
+                <Loader2 className="h-8 w-8 animate-spin text-[#00b6b5]" />
+              </div>
+            )}
+            {isError && (
+              <div className="flex flex-1 items-center justify-center text-[16px] text-red-500">
+                שגיאה בטעינת הנתונים
+              </div>
+            )}
+            {!isLoading && !isError && goals.length === 0 && (
+              <div className="flex flex-1 items-center justify-center text-[16px] text-[#aaa]">
+                אין משימות בקטגוריה זו עדיין
+              </div>
+            )}
+
+            {/* Goal grid */}
+            {!isLoading && !isError && goals.length > 0 && (
+              <div className="min-h-0 flex-1 overflow-y-auto px-[18px] pb-[18px]">
+                <div className="grid grid-cols-2 gap-x-[14px] gap-y-[10px]">
+                  {goals.map((goal) => (
+                    <GoalCard
+                      key={goal.id}
+                      goal={goal}
+                      onDelete={() => deleteGoal.mutate(goal.id)}
+                      onToggleAction={(actions) =>
+                        toggleAction.mutate({ goalId: goal.id, actions })
+                      }
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+          </section>
+        </div>
       </div>
 
-      {open && <NewTaskModal onClose={() => setOpen(false)} onSave={addTask} />}
+      {open && (
+        <NewGoalModal
+          activeTab={activeTab}
+          userId={user?.id ?? ""}
+          onClose={() => setOpen(false)}
+        />
+      )}
     </DashboardShell>
   );
 }
 
-function NewTaskModal({
-  onClose,
-  onSave,
+function GoalCard({
+  goal,
+  onDelete,
+  onToggleAction,
 }: {
-  onClose: () => void;
-  onSave: (t: Task) => void;
+  goal: MarketingGoal;
+  onDelete: () => void;
+  onToggleAction: (actions: ActionItem[]) => void;
 }) {
-  const [title, setTitle] = useState("");
-  const [date, setDate] = useState("01.01.2026");
-  const [goal, setGoal] = useState("");
-  const [weekly, setWeekly] = useState("");
-  const [target, setTarget] = useState("מכירות");
-  const [actions, setActions] = useState<string[]>(["עדכון אתר", "עדכון אתר", "עדכון אתר", "עדכון אתר"]);
+  const actions = (goal.actions as ActionItem[] | null) ?? [];
+  const done = actions.filter((a) => a.done).length;
+  const color = goal.status === "completed" ? "#008f15" : "#f15a48";
 
-  const save = () => {
-    onSave({
-      title: title || "משימה חדשה",
-      time: `היום ${new Date().toLocaleTimeString("he-IL", { hour: "2-digit", minute: "2-digit" })}`,
+  return (
+    <div className="flex h-auto min-h-[54px] flex-col gap-1 rounded-[10px] border border-[#eee] bg-white px-4 py-3 shadow-[0_2px_6px_rgba(0,0,0,0.05)]">
+      <div className="flex items-center gap-3">
+        <div className="shrink-0 rounded-full border-2" style={{ width: 18, height: 18, borderColor: color }} />
+        <div className="min-w-0 flex-1 text-right">
+          <div className="truncate text-[16px] font-bold leading-tight" style={{ color }}>
+            {goal.title}
+          </div>
+          {goal.target_date && (
+            <div className="mt-0.5 text-[12px] leading-tight text-[#888]">
+              יעד: {goal.target_date}
+            </div>
+          )}
+        </div>
+        <div className="flex items-center gap-1.5">
+          {actions.length > 0 && (
+            <span className="text-[11px] text-[#888]">{done}/{actions.length}</span>
+          )}
+          <button onClick={onDelete} className="text-[#ccc] hover:text-red-400">
+            <Trash2 className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      </div>
+      {goal.weekly_task && (
+        <div className="text-right text-[12px] text-[#666]">
+          שבועי: {goal.weekly_task}
+        </div>
+      )}
+    </div>
+  );
+}
+
+function NewGoalModal({
+  activeTab,
+  userId,
+  onClose,
+}: {
+  activeTab: MarketingCategory;
+  userId: string;
+  onClose: () => void;
+}) {
+  const createGoal = useCreateMarketingGoal(userId);
+  const [title, setTitle] = useState("");
+  const [date, setDate] = useState("");
+  const [measurable, setMeasurable] = useState("");
+  const [weekly, setWeekly] = useState("");
+  const [category, setCategory] = useState<MarketingCategory>(activeTab);
+  const [actions, setActions] = useState<string[]>(["", "", "", ""]);
+
+  const save = async () => {
+    if (!title.trim()) return;
+    const actionItems: ActionItem[] = actions
+      .filter((a) => a.trim())
+      .map((text) => ({ text, done: false }));
+
+    await createGoal.mutateAsync({
+      title,
+      category,
+      target_date: date || undefined,
+      measurable_target: measurable || undefined,
+      weekly_task: weekly || undefined,
+      actions: actionItems,
+      status: "active",
     });
+    onClose();
   };
 
   return (
@@ -152,25 +253,26 @@ function NewTaskModal({
       dir="rtl"
     >
       <div
-        className="relative w-[92vw] max-w-[1340px] h-[86vh] max-h-[760px] overflow-auto rounded-[18px] bg-white p-10 shadow-2xl"
+        className="relative h-[86vh] max-h-[760px] w-[92vw] max-w-[1340px] overflow-auto rounded-[18px] bg-white p-10 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <button
           onClick={onClose}
-          className="absolute left-5 top-5 flex h-8 w-8 items-center justify-center rounded-full border-2 border-coral text-coral"
+          className="absolute left-5 top-5 flex h-8 w-8 items-center justify-center rounded-full border-2 border-[#f15a48] text-[#f15a48]"
         >
           <X className="h-4 w-4" />
         </button>
 
-        <h2 className="mb-6 text-center text-[22px] font-bold text-teal underline underline-offset-4">
+        <h2 className="mb-6 text-center text-[22px] font-bold text-[#00b6b5] underline underline-offset-4">
           הוספת משימה חדשה
         </h2>
 
         <div className="grid grid-cols-3 gap-3">
           <FieldHeader label="תאריך יעד לביצוע">
             <div className="flex items-center justify-center gap-2 px-3 py-2.5">
-              <Calendar className="h-4 w-4 text-teal" />
+              <Calendar className="h-4 w-4 text-[#00b6b5]" />
               <input
+                type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
                 className="w-full bg-transparent text-center text-[14px] outline-none"
@@ -179,8 +281,8 @@ function NewTaskModal({
           </FieldHeader>
           <FieldHeader label="יעדים מדידים">
             <input
-              value={goal}
-              onChange={(e) => setGoal(e.target.value)}
+              value={measurable}
+              onChange={(e) => setMeasurable(e.target.value)}
               placeholder="פירוט מספרי ליעד"
               className="w-full bg-transparent px-3 py-2.5 text-center text-[14px] text-[#999] outline-none"
             />
@@ -189,7 +291,7 @@ function NewTaskModal({
             <input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="..."
+              placeholder="כותרת המשימה..."
               className="w-full bg-transparent px-3 py-2.5 text-center text-[14px] text-[#999] outline-none"
             />
           </FieldHeader>
@@ -207,22 +309,20 @@ function NewTaskModal({
             </FieldHeader>
             <FieldHeader label="מטרת היעד">
               <div className="flex items-center justify-center gap-2 px-3 py-2.5">
-                <ChevronDown className="h-4 w-4 text-coral" />
+                <ChevronDown className="h-4 w-4 text-[#f15a48]" />
                 <select
-                  value={target}
-                  onChange={(e) => setTarget(e.target.value)}
+                  value={category}
+                  onChange={(e) => setCategory(e.target.value as MarketingCategory)}
                   className="w-full appearance-none bg-transparent text-center text-[14px] outline-none"
                 >
-                  <option>מכירות</option>
-                  <option>שיווק</option>
-                  <option>שימור</option>
+                  {tabs.map((t) => <option key={t}>{t}</option>)}
                 </select>
               </div>
             </FieldHeader>
           </div>
 
-          <div className="rounded-[10px] border border-[#eee] bg-white overflow-hidden">
-            <div className="bg-coral py-2 text-center text-[15px] font-bold text-white">
+          <div className="overflow-hidden rounded-[10px] border border-[#eee] bg-white">
+            <div className="bg-[#f15a48] py-2 text-center text-[15px] font-bold text-white">
               פירוט פעולות להשלמת המשימה
             </div>
             <div className="px-3 py-2">
@@ -230,35 +330,35 @@ function NewTaskModal({
                 <div key={i} className="flex items-center justify-between border-b border-[#f0f0f0] py-1.5 last:border-0">
                   <div className="flex items-center gap-2 text-[12px] text-[#888]">
                     <Pencil className="h-3 w-3" />
-                    <Trash2 className="h-3 w-3" />
-                    <span>היום</span>
-                    <span>09:00 PM</span>
+                    <Trash2 className="h-3 w-3 cursor-pointer hover:text-red-400" onClick={() => setActions(actions.filter((_, j) => j !== i))} />
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-[13px]">{a}</span>
-                    <input type="radio" />
-                  </div>
+                  <input
+                    value={a}
+                    onChange={(e) => {
+                      const next = [...actions];
+                      next[i] = e.target.value;
+                      setActions(next);
+                    }}
+                    placeholder="פעולה..."
+                    className="flex-1 bg-transparent px-2 text-center text-[13px] outline-none"
+                  />
                 </div>
               ))}
-              <div className="mt-2 flex items-center justify-between border-t border-[#eee] pt-2 text-[#888]">
-                <div className="flex items-center gap-2">
-                  <Trash2 className="h-3.5 w-3.5" />
-                  <Calendar className="h-3.5 w-3.5" />
-                  <span className="text-[11px]">|</span>
-                </div>
+              <div className="mt-2 flex justify-end border-t border-[#eee] pt-2">
                 <button
-                  onClick={() => setActions([...actions, "עדכון אתר"])}
+                  onClick={() => setActions([...actions, ""])}
                   className="flex h-5 w-5 items-center justify-center rounded-full border border-[#888]"
                 >
                   <Plus className="h-3 w-3" />
                 </button>
               </div>
             </div>
-            <div className="px-3 pb-2 text-left text-[10px] text-coral">
-              לפתיחה בחלונית נפרדת
-            </div>
           </div>
         </div>
+
+        {createGoal.isError && (
+          <p className="mt-3 text-center text-[14px] text-red-500">שגיאה בשמירה, נסי שוב</p>
+        )}
 
         <div className="mt-6 flex items-center gap-3" dir="ltr">
           <button
@@ -269,9 +369,10 @@ function NewTaskModal({
           </button>
           <button
             onClick={save}
-            className="h-[42px] rounded-[8px] bg-coral px-8 text-[15px] font-bold text-white shadow-[0_4px_10px_rgba(255,107,87,0.35)]"
+            disabled={createGoal.isPending || !title.trim()}
+            className="h-[42px] rounded-[8px] bg-[#f15a48] px-8 text-[15px] font-bold text-white shadow-[0_4px_10px_rgba(255,107,87,0.35)] disabled:opacity-60"
           >
-            שמירת משימה
+            {createGoal.isPending ? "שומר..." : "שמירת משימה"}
           </button>
         </div>
       </div>
@@ -282,20 +383,20 @@ function NewTaskModal({
 function FieldHeader({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div className="overflow-hidden rounded-[10px] border border-[#eee] bg-white">
-      <div className="bg-teal py-2 text-center text-[14px] font-bold text-white">{label}</div>
+      <div className="bg-[#00b6b5] py-2 text-center text-[14px] font-bold text-white">{label}</div>
       {children}
     </div>
   );
 }
 
-function TicksGauge({ value, max }: { value: number; max: number }) {
-  const size = 240;
+function TicksGauge({ value, max, lines }: { value: number; max: number; lines: [string, string] }) {
+  const size = 260;
   const cx = size / 2;
   const cy = size / 2;
-  const rOuter = 110;
-  const rInner = 92;
+  const rOuter = 120;
+  const rInner = 100;
   const totalTicks = 30;
-  const filledTicks = Math.round((value / max) * totalTicks);
+  const filledTicks = Math.round((Math.min(value, max) / max) * totalTicks);
 
   return (
     <div className="relative" style={{ width: size, height: size }}>
@@ -306,26 +407,19 @@ function TicksGauge({ value, max }: { value: number; max: number }) {
           const y1 = cy + Math.sin(angle) * rInner;
           const x2 = cx + Math.cos(angle) * rOuter;
           const y2 = cy + Math.sin(angle) * rOuter;
-          const isFilled = i < filledTicks;
           return (
-            <line
-              key={i}
-              x1={x1}
-              y1={y1}
-              x2={x2}
-              y2={y2}
-              stroke={isFilled ? "#18b5b6" : "#cfeeee"}
-              strokeWidth={8}
-              strokeLinecap="round"
+            <line key={i} x1={x1} y1={y1} x2={x2} y2={y2}
+              stroke={i < filledTicks ? "#f15a48" : "#cfeeee"}
+              strokeWidth={9} strokeLinecap="round"
             />
           );
         })}
       </svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <div className="text-[56px] font-extrabold leading-none text-coral">{value}</div>
-        <div className="mt-1 text-[14px] font-bold leading-tight text-[#222]">מכירות יזומות</div>
-        <div className="text-[14px] font-bold leading-tight text-[#222]">חדשות</div>
-        <div className="mt-1 text-[12px] text-[#666]">מתוך {max}</div>
+        <div className="text-[60px] font-extrabold leading-none text-[#f15a48]">{value}</div>
+        <div className="mt-1 text-[13px] font-bold leading-tight text-[#222]">{lines[0]}</div>
+        <div className="text-[13px] font-bold leading-tight text-[#222]">{lines[1]}</div>
+        <div className="mt-1 text-[12px] text-[#00b6b5]">מתוך {max}</div>
       </div>
     </div>
   );

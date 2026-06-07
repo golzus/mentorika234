@@ -1,0 +1,27 @@
+---
+description: Git — commits, docs sync, אין מחיקה ללא אישור
+alwaysApply: true
+---
+
+# Git
+
+## Commits
+
+- Conventional commits: `feat:`, `fix:`, `docs:`, `refactor:`
+- הודעה מתארת **למה**, לא רק מה
+- Branch per feature
+
+## Docs Sync
+
+לאחר Feature — עדכן TODO, DB, API, DECISIONS.
+**אין** קוד מעודכן + docs לא.
+
+## אסור
+
+- Force push ל-main
+- מחיקת קבצים ללא אישור מפורש
+- Commit של secrets (.env)
+
+## TODO Flow
+
+BACKLOG → IN_PROGRESS → DONE

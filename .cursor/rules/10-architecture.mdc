@@ -1,0 +1,38 @@
+---
+description: ארכיטקטורת TanStack Start, routing, development flow
+globs: src/**/*
+alwaysApply: false
+---
+
+# ארכיטקטורה
+
+## Framework
+
+- TanStack Start + TanStack Router — **לא** Next.js/Remix
+- Routes: `src/routes/*.tsx` (file-based)
+- `routeTree.gen.ts` — auto-generated, לא לערוך
+- Root: `src/routes/__root.tsx`
+
+## Server
+
+- Server Functions: `createServerFn` ב-`src/lib/api/`
+- Entry: `src/server.ts`, `src/start.ts`
+- Config server-only: `*.server.ts`
+
+## Development Flow
+
+```
+UI → Types → Zod → ServerFn → React Query → Integration → Testing → Security → Docs
+```
+
+## Alias
+
+`@/*` → `./src/*`
+
+## Build
+
+Vite 7 → Nitro → Cloudflare Workers (Lovable config)
+
+## אין לשנות
+
+ארכיטקטורת TanStack Start ללא אישור Lead Architect.

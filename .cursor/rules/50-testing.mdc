@@ -1,0 +1,34 @@
+---
+description: Testing Gate — בדיקות ידניות חובה לפני DONE
+alwaysApply: true
+---
+
+# Testing Gate
+
+לפני סימון Feature כ-DONE — בדיקה ידנית חובה:
+
+## CRUD
+
+- [ ] Create
+- [ ] Update
+- [ ] Delete
+- [ ] חיפוש/סינון (אם קיים)
+
+## States
+
+- [ ] Empty State
+- [ ] Loading State
+- [ ] Error State
+- [ ] Validation Errors
+
+## Security
+
+- [ ] Unauthorized User (לא מחובר)
+- [ ] User Isolation (לא רואה נתוני משתמש אחר)
+
+## UI
+
+- [ ] Responsive Layout
+- [ ] RTL תקין
+
+Feature לא עובר ל-DONE בלי Testing Gate.
