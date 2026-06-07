@@ -152,7 +152,7 @@ function NewTaskModal({
       dir="rtl"
     >
       <div
-        className="relative w-[760px] rounded-[16px] border-[3px] border-[#3ba9ff] bg-white p-8 shadow-2xl"
+        className="relative w-[92vw] max-w-[1340px] h-[86vh] max-h-[760px] overflow-auto rounded-[18px] bg-white p-10 shadow-2xl"
         onClick={(e) => e.stopPropagation()}
       >
         <button
