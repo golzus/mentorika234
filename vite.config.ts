@@ -13,4 +13,9 @@ export default defineConfig({
   nitro: {
     preset: "node-server",
   },
+  vite: {
+    server: {
+      cors: true,
+    },
+  },
 });
