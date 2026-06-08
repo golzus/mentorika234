@@ -12,6 +12,7 @@ import { DashboardShell } from "@/components/DashboardShell";
 import { AuthProvider } from "@/lib/auth/auth-context";
 
 import appCss from "../styles.css?url";
+import favicon from "@/assets/logo-mentorika-full.png";
 
 function NotFoundComponent() {
   return (
@@ -112,6 +113,11 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       {
         rel: "stylesheet",
         href: appCss,
+      },
+      {
+        rel: "icon",
+        href: favicon,
+        type: "image/png",
       },
     ],
   }),
