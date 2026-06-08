@@ -88,22 +88,28 @@ export function DashboardShell({
         >
           <img src={panelUnion} alt="" className="absolute" style={figmaRect(30, 30, 1590, 810)} />
 
-          <div className="absolute z-30" style={figmaRect(25, -91, 104, 337)}>
-            <div className="flex h-full w-full items-center justify-center">
-              <div className="-rotate-90">
-                <div className="h-[104px] w-[337px] rounded-[10px] bg-[#f15a48] shadow-[0_15px_30px_rgba(0,0,0,0.1)]" />
+          {active === "מסך פתיחה" && (
+            <div className="absolute z-30" style={figmaRect(25, -91, 104, 337)}>
+              <div className="flex h-full w-full items-center justify-center">
+                <div className="-rotate-90">
+                  <div className="h-[104px] w-[337px] rounded-[10px] bg-[#f15a48] shadow-[0_15px_30px_rgba(0,0,0,0.1)]" />
+                </div>
+              </div>
+              <div className="absolute left-1/2 top-[31px] w-[90px] -translate-x-1/2 -translate-y-1/2 text-center text-[18px] font-bold leading-[20px] text-[#fffbf7]">
+                הטיפ היומי
+              </div>
+              <img
+                src={tipDivider}
+                alt=""
+                className="absolute left-[7px] top-[71px] h-px w-[90px]"
+              />
+              <div className="absolute left-1/2 top-[158.5px] w-[89px] -translate-x-1/2 -translate-y-1/2 text-center text-[18px] font-normal leading-[25px] text-[#fffbf7]">
+                עקבי אחרי המספרים -
+                <br />
+                הם מספרים את הסיפור האמיתי
               </div>
             </div>
-            <div className="absolute left-1/2 top-[31px] w-[90px] -translate-x-1/2 -translate-y-1/2 text-center text-[18px] font-bold leading-[20px] text-[#fffbf7]">
-              הטיפ היומי
-            </div>
-            <img src={tipDivider} alt="" className="absolute left-[7px] top-[71px] h-px w-[90px]" />
-            <div className="absolute left-1/2 top-[158.5px] w-[89px] -translate-x-1/2 -translate-y-1/2 text-center text-[18px] font-normal leading-[25px] text-[#fffbf7]">
-              עקבי אחרי המספרים -
-              <br />
-              הם מספרים את הסיפור האמיתי
-            </div>
-          </div>
+          )}
 
           <nav className="absolute z-20 pl-2" style={figmaRect(1500, 150.5, 120, 620)}>
             {active === "מסך פתיחה" ? (

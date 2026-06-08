@@ -2,6 +2,7 @@ import { supabase } from "@/lib/db/client";
 
 export type DashboardSummary = {
   leadsTotal: number;
+  leadsThisMonth: number;
   leadsNew: number;
   leadsInProgress: number;
   leadsClosed: number;
@@ -19,7 +20,7 @@ export type DashboardSummary = {
 
 export async function getDashboardSummary(userId: string): Promise<DashboardSummary> {
   const [leadsRes, marketingRes, profileRes] = await Promise.all([
-    supabase.from("leads").select("status").eq("user_id", userId),
+    supabase.from("leads").select("status, created_at").eq("user_id", userId),
     supabase
       .from("marketing_goals")
       .select("id, title, category, weekly_task, status")
@@ -36,6 +37,11 @@ export async function getDashboardSummary(userId: string): Promise<DashboardSumm
 
   const leads = leadsRes.data ?? [];
   const goals = marketingRes.data ?? [];
+  const now = new Date();
+  const isCurrentMonth = (date: string) => {
+    const value = new Date(date);
+    return value.getMonth() === now.getMonth() && value.getFullYear() === now.getFullYear();
+  };
 
   const categoryGoals: Record<string, number> = {};
   for (const g of goals) {
@@ -46,6 +52,7 @@ export async function getDashboardSummary(userId: string): Promise<DashboardSumm
 
   return {
     leadsTotal: leads.length,
+    leadsThisMonth: leads.filter((l) => isCurrentMonth(l.created_at)).length,
     leadsNew: leads.filter((l) => l.status === "new").length,
     leadsInProgress: leads.filter((l) => l.status === "in_progress").length,
     leadsClosed: leads.filter((l) => l.status === "closed").length,

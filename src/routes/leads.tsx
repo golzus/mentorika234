@@ -1,6 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import plusIcon from "@/assets/figma/plus-icon.svg";
-import { X, Loader2 } from "lucide-react";
+import { Plus, X, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { DashboardShell } from "@/components/DashboardShell";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
@@ -29,6 +28,7 @@ const STATUS_LABELS: { key: LeadStatus | "all"; label: string }[] = [
 function LeadsPage() {
   const { user } = useAuth();
   const [activeFilter, setActiveFilter] = useState<LeadStatus | "all">("all");
+  const [search, setSearch] = useState("");
   const [addOpen, setAddOpen] = useState(false);
   const [editingLead, setEditingLead] = useState<Lead | null>(null);
 
@@ -37,8 +37,19 @@ function LeadsPage() {
   const updateLead = useUpdateLead(user?.id ?? "");
   const deleteLead = useDeleteLead(user?.id ?? "");
 
-  const filteredLeads =
+  const statusFilteredLeads =
     activeFilter === "all" ? allLeads : allLeads.filter((l) => l.status === activeFilter);
+  const normalizedSearch = search.trim().toLowerCase();
+  const filteredLeads = normalizedSearch
+    ? statusFilteredLeads.filter((lead) =>
+        [lead.name, lead.phone, lead.email, lead.source, lead.interested_in, lead.proposed_price]
+          .filter(Boolean)
+          .some((value) => value!.toLowerCase().includes(normalizedSearch)),
+      )
+    : statusFilteredLeads;
+  const closedRevenue = allLeads
+    .filter((lead) => lead.status === "closed")
+    .reduce((sum, lead) => sum + parseLeadPrice(lead.proposed_price), 0);
 
   const counts: Record<string, number> = {
     all: allLeads.length,
@@ -65,6 +76,16 @@ function LeadsPage() {
               {label} — {counts[key]}
             </button>
           ))}
+        </div>
+
+        <div className="flex h-[38px] shrink-0 items-center gap-3 rounded-[8px] border border-[#e7e7e7] bg-white px-4 shadow-[0_2px_8px_rgba(0,0,0,0.04)]">
+          <span className="text-[13px] font-bold text-[#0d0221]">חיפוש</span>
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="שם, טלפון, מייל, מקור, התעניינות או מחיר"
+            className="min-w-0 flex-1 bg-transparent text-right text-[14px] text-[#444] outline-none placeholder:text-[#aaa]"
+          />
         </div>
 
         {/* ── Main content ─────────────────────────────────────── */}
@@ -114,13 +135,25 @@ function LeadsPage() {
           <div className="flex w-[18%] min-w-[170px] flex-col gap-[3%]">
             <button
               onClick={() => setAddOpen(true)}
-              className="flex h-[52px] shrink-0 items-center justify-center gap-2 rounded-[8px] bg-[#f15a48] text-[16px] font-bold text-white shadow-[0_4px_10px_rgba(241,90,72,0.35)] transition-opacity hover:opacity-90"
+              className="flex h-[48px] items-center gap-5 rounded-[10px] bg-[#ff5a49] px-3.5 text-[18px] font-normal text-[#0d0221] shadow-[0_6px_14px_rgba(241,90,72,0.35)]"
+              dir="ltr"
             >
-              <span className="flex h-7 w-7 items-center justify-center rounded-[4px] border-2 border-white">
-                <img src={plusIcon} alt="" className="h-[13px] w-[15px]" />
+              <span className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-[3px] border-2 border-[#0d0221]">
+                <Plus className="h-6 w-6" strokeWidth={2.4} />
               </span>
-              הוספת ליד
+              <span className="flex items-center" dir="rtl">
+                הוספת ליד
+              </span>
             </button>
+
+            <div className="rounded-[8px] border border-[#e2e2e2] bg-white p-4 text-center shadow-[0_1px_4px_rgba(0,0,0,0.04)]">
+              <div className="text-[13px] font-bold leading-[18px] text-[#0d0221]">
+                הכנסות מלידים שנסגרו
+              </div>
+              <div className="mt-2 text-[24px] font-bold leading-[30px] text-[#f15a48]">
+                {formatLeadCurrency(closedRevenue)} ש"ח
+              </div>
+            </div>
 
             <div className="flex flex-1 flex-col items-center justify-center rounded-[8px] border border-[#e2e2e2] bg-white p-4 text-center text-[13px] leading-[1.6] text-[#f15a48] shadow-[0_1px_4px_rgba(0,0,0,0.04)]">
               <p>
@@ -166,6 +199,16 @@ function LeadsPage() {
       )}
     </DashboardShell>
   );
+}
+
+function parseLeadPrice(price: string | null | undefined) {
+  if (!price) return 0;
+  const parsed = Number(price.replace(/[^\d.-]/g, ""));
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
+function formatLeadCurrency(value: number) {
+  return new Intl.NumberFormat("he-IL").format(value);
 }
 
 // ─── LeadRow ──────────────────────────────────────────────────────────────────

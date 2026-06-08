@@ -123,12 +123,6 @@ function formatDate(date: string | null | undefined) {
   return new Intl.DateTimeFormat("he-IL").format(new Date(date));
 }
 
-function formatLeadMeta(lead: Lead) {
-  return [lead.source, lead.interested_in, lead.proposed_price, formatDate(lead.created_at)]
-    .filter(Boolean)
-    .join(" | ");
-}
-
 function parsePrice(price: string | null | undefined) {
   if (!price) return 0;
   const normalized = price.replace(/[^\d.-]/g, "");
@@ -172,7 +166,7 @@ function LeadsDashboard() {
   } = useDashboardSummary(user?.id);
 
   const negotiationLeads = allLeads.filter((lead) => lead.status === "in_progress");
-  const activeClients = allLeads.filter((lead) => lead.status === "closed").slice(0, 3);
+  const monthlyLeads = allLeads.filter((lead) => isThisMonth(lead.created_at)).slice(0, 3);
   const monthlyRevenue = allLeads
     .filter((lead) => lead.status === "closed" && isThisMonth(lead.updated_at || lead.created_at))
     .reduce((sum, lead) => sum + parsePrice(lead.proposed_price), 0);
@@ -201,7 +195,12 @@ function LeadsDashboard() {
         }
       />
       <RevenueSection revenue={monthlyRevenue} target={monthlyTarget} />
-      <ActiveClientsSection leads={activeClients} isLoading={leadsLoading} isError={leadsError} />
+      <MonthlyLeadsSection
+        leads={monthlyLeads}
+        total={summary?.leadsThisMonth ?? monthlyLeads.length}
+        isLoading={leadsLoading || summaryLoading}
+        isError={leadsError || summaryError}
+      />
       <StatsSection
         categoryGoals={summary?.categoryGoals ?? {}}
         isLoading={isLoading}
@@ -339,18 +338,19 @@ function LeadsSection({
                   />
                 </div>
 
-                <div className="flex h-[24.783px] w-full min-w-0 items-center justify-end gap-[30px] pl-[155px] pr-[30px]">
-                  <div className="h-[19px] w-px shrink-0 bg-[#d9d9d9]" />
-                  <div
-                    className="max-w-[360px] truncate text-[18px] leading-[25px] text-[#0d0221]"
-                    dir="rtl"
-                  >
-                    {formatLeadMeta(lead)}
-                  </div>
-                  <div className="h-[19px] w-px shrink-0 bg-[#d9d9d9]" />
-                  <div className="max-w-[150px] truncate text-[18px] font-bold leading-[25px] text-[#0d0221]">
-                    {lead.name}
-                  </div>
+                <div
+                  className="absolute left-[155px] right-[30px] top-1/2 grid h-[24.783px] -translate-y-1/2 grid-cols-[120px_1px_90px_1px_115px_1px_80px_1px_90px] items-center text-[18px] leading-[25px] text-[#0d0221]"
+                  dir="rtl"
+                >
+                  <div className="min-w-0 truncate text-right font-bold">{lead.name}</div>
+                  <div className="h-[19px] w-px bg-[#d9d9d9]" />
+                  <div className="min-w-0 truncate text-right">{lead.source}</div>
+                  <div className="h-[19px] w-px bg-[#d9d9d9]" />
+                  <div className="min-w-0 truncate text-right">{lead.interested_in}</div>
+                  <div className="h-[19px] w-px bg-[#d9d9d9]" />
+                  <div className="min-w-0 truncate text-right">{lead.proposed_price}</div>
+                  <div className="h-[19px] w-px bg-[#d9d9d9]" />
+                  <div className="min-w-0 truncate text-right">{formatDate(lead.created_at)}</div>
                 </div>
               </div>
             ))}
@@ -719,12 +719,14 @@ function RevenueSection({ revenue, target }: { revenue: number; target: number }
   );
 }
 
-function ActiveClientsSection({
+function MonthlyLeadsSection({
   leads,
+  total,
   isLoading,
   isError,
 }: {
   leads: Lead[];
+  total: number;
   isLoading: boolean;
   isError: boolean;
 }) {
@@ -737,7 +739,7 @@ function ActiveClientsSection({
         style={figmaRect(570, 570.5, 330, 210)}
       />
       <TealHeader left={570} top={570.5} width={330}>
-        לקוחות פעילים
+        לידים החודש
       </TealHeader>
 
       {isLoading && (
@@ -745,7 +747,7 @@ function ActiveClientsSection({
           className="absolute text-center text-[16px] leading-[25px] text-[#0d0221]"
           style={figmaRect(588, 674, 278, 25)}
         >
-          טוען לקוחות...
+          טוען לידים...
         </div>
       )}
       {isError && (
@@ -753,7 +755,7 @@ function ActiveClientsSection({
           className="absolute text-center text-[16px] leading-[25px] text-[#f15a48]"
           style={figmaRect(588, 674, 278, 25)}
         >
-          שגיאה בטעינת לקוחות
+          שגיאה בטעינת לידים
         </div>
       )}
       {!isLoading && !isError && leads.length === 0 && (
@@ -761,7 +763,14 @@ function ActiveClientsSection({
           className="absolute text-center text-[16px] leading-[25px] text-[#0d0221]"
           style={figmaRect(588, 674, 278, 25)}
         >
-          אין לקוחות פעילים עדיין
+          אין לידים חדשים החודש
+        </div>
+      )}
+
+      {!isLoading && !isError && leads.length > 0 && (
+        <div className="absolute text-right" style={figmaRect(600, 602, 250, 30)} dir="rtl">
+          <span className="text-[24px] font-bold leading-[30px] text-[#f15a48]">{total}</span>
+          <span className="mr-2 text-[14px] leading-[20px] text-[#0d0221]">לידים חדשים</span>
         </div>
       )}
 
@@ -769,13 +778,13 @@ function ActiveClientsSection({
         <div
           key={lead.id}
           className="absolute flex h-[39px] items-center gap-[5px]"
-          style={figmaRect(588, rowTops[i] + 7.83, 278.337, 39)}
+          style={figmaRect(588, rowTops[i] + 15, 278.337, 39)}
           dir="ltr"
         >
           <span className="w-[11px] text-center text-[12px] leading-none text-[#0d0221]">‹</span>
           <div className="h-[9px] w-px bg-[#d9d9d9]" />
           <span className="text-[12px] leading-[15px] text-[#0d0221]" dir="rtl">
-            {formatLeadMeta(lead)}
+            {formatDate(lead.created_at)}
           </span>
           <div className="h-[9px] w-px bg-[#d9d9d9]" />
           <span className="truncate text-[18px] leading-[25px] text-[#0d0221]">{lead.name}</span>

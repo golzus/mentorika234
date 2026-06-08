@@ -116,6 +116,8 @@ function ProfilePage() {
               setLastName={setLastName}
               businessName={businessName}
               setBusinessName={setBusinessName}
+              businessField={businessField}
+              setBusinessField={setBusinessField}
               slogan={slogan}
               setSlogan={setSlogan}
             />
@@ -161,6 +163,8 @@ function IntroStep({
   setLastName,
   businessName,
   setBusinessName,
+  businessField,
+  setBusinessField,
   slogan,
   setSlogan,
 }: {
@@ -170,6 +174,8 @@ function IntroStep({
   setLastName: (v: string) => void;
   businessName: string;
   setBusinessName: (v: string) => void;
+  businessField: string;
+  setBusinessField: (v: string) => void;
   slogan: string;
   setSlogan: (v: string) => void;
 }) {
@@ -190,6 +196,12 @@ function IntroStep({
         placeholder="שם העסק"
       />
       <QACard
+        question="מה התחום העסקי שלך?"
+        value={businessField}
+        onChange={setBusinessField}
+        placeholder="תחום עסקי"
+      />
+      <QACard
         question="הסלוגן שלי"
         value={slogan}
         onChange={setSlogan}
@@ -206,9 +218,15 @@ function BusinessStep({ gc, setGc }: { gc: GoldenCircle; setGc: (v: GoldenCircle
     <div className="grid h-full grid-cols-2 gap-x-[24px] gap-y-[16px]" dir="rtl">
       <PromptCard
         question="למה בחרתי בתחום הזה?"
-        prompt="ספרי על הזיקה שלך לעסק, למה את הכי מחוברת"
+        prompt="מה הסיבה שבגללה בחרת לפעול בתחום הזה?"
         value={gc.why ?? ""}
         onChange={update("why")}
+      />
+      <PromptCard
+        question="ספרי על הזיקה שלך לעסק"
+        prompt="למה את הכי מחוברת בעסק ובשירות שאת נותנת?"
+        value={gc.affinity ?? ""}
+        onChange={update("affinity")}
       />
       <PromptCard
         question="מה אני הכי מוכרת? (מוצר הדגל שלי?)"
