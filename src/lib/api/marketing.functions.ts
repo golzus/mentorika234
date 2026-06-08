@@ -1,17 +1,40 @@
 import { supabase } from "@/lib/db/client";
-import type {
-  MarketingCategory,
-  MarketingGoalInsert,
-  MarketingGoalUpdate,
-  ActionItem,
+import {
+  actionItemSchema,
+  marketingGoalInsertSchema,
+  marketingGoalUpdateSchema,
+  type MarketingCategory,
+  type MarketingGoalInsert,
+  type MarketingGoalUpdate,
+  type ActionItem,
 } from "@/lib/db/schemas";
+import { parseInput } from "@/lib/validation";
 
-export async function listMarketingGoals(userId: string, category?: MarketingCategory) {
+const MARKETING_GOAL_SELECT =
+  "id, user_id, category, title, description, measurable_target, target_date, actions, weekly_task, status, created_at, updated_at";
+
+export type ListMarketingGoalsOptions = {
+  category?: MarketingCategory;
+  page?: number;
+  pageSize?: number;
+};
+
+function getRange(page = 1, pageSize = 50) {
+  const safePage = Math.max(1, page);
+  const safePageSize = Math.min(Math.max(1, pageSize), 100);
+  const from = (safePage - 1) * safePageSize;
+  return { from, to: from + safePageSize - 1 };
+}
+
+export async function listMarketingGoals(userId: string, options: ListMarketingGoalsOptions = {}) {
+  const { category, page, pageSize } = options;
+  const { from, to } = getRange(page, pageSize);
   let query = supabase
     .from("marketing_goals")
-    .select("*")
+    .select(MARKETING_GOAL_SELECT)
     .eq("user_id", userId)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .range(from, to);
 
   if (category) {
     query = query.eq("category", category);
@@ -23,9 +46,10 @@ export async function listMarketingGoals(userId: string, category?: MarketingCat
 }
 
 export async function createMarketingGoal(userId: string, input: MarketingGoalInsert) {
+  const validInput = parseInput(marketingGoalInsertSchema, input);
   const { data, error } = await supabase
     .from("marketing_goals")
-    .insert({ ...input, user_id: userId, created_by: userId })
+    .insert({ ...validInput, user_id: userId, created_by: userId })
     .select()
     .single();
 
@@ -38,9 +62,10 @@ export async function updateMarketingGoal(
   userId: string,
   updates: MarketingGoalUpdate,
 ) {
+  const validUpdates = parseInput(marketingGoalUpdateSchema, updates);
   const { data, error } = await supabase
     .from("marketing_goals")
-    .update({ ...updates, updated_by: userId })
+    .update({ ...validUpdates, updated_by: userId })
     .eq("id", goalId)
     .eq("user_id", userId)
     .select()
@@ -61,10 +86,11 @@ export async function deleteMarketingGoal(goalId: string, userId: string) {
 }
 
 export async function toggleAction(goalId: string, userId: string, actions: ActionItem[]) {
+  const validActions = parseInput(actionItemSchema.array(), actions);
   const { data, error } = await supabase
     .from("marketing_goals")
     .update({
-      actions: actions as unknown as import("@/lib/db/database.types").Json,
+      actions: validActions as unknown as import("@/lib/db/database.types").Json,
       updated_by: userId,
     })
     .eq("id", goalId)

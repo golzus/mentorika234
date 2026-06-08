@@ -1,11 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useState, useEffect } from "react";
-import { DashboardShell } from "@/components/DashboardShell";
 import { useAuth } from "@/lib/auth/auth-context";
+import { requireAuth } from "@/lib/auth/route-guards";
 import { useProfile, useUpsertProfile } from "@/hooks/use-profile";
 import type { GoldenCircle } from "@/lib/db/schemas";
 
 export const Route = createFileRoute("/profile")({
+  beforeLoad: requireAuth,
   head: () => ({
     meta: [
       { title: "מנטוריקה — פרופיל העסק" },
@@ -70,16 +71,14 @@ function ProfilePage() {
 
   if (isLoading) {
     return (
-      <DashboardShell active="פרופיל העסק" breadcrumb="פרופיל העסק">
-        <div className="flex h-full items-center justify-center">
-          <div className="text-[18px] text-[#00b6b5]">טוען...</div>
-        </div>
-      </DashboardShell>
+      <div className="flex h-full items-center justify-center">
+        <div className="text-[18px] text-[#00b6b5]">טוען...</div>
+      </div>
     );
   }
 
   return (
-    <DashboardShell active="פרופיל העסק" breadcrumb="פרופיל העסק">
+    <>
       <div className="flex h-full flex-col gap-[12px]">
         <div className="flex shrink-0 flex-col items-center">
           <div className="flex items-center" dir="ltr">
@@ -146,7 +145,7 @@ function ProfilePage() {
           )}
         </div>
       </div>
-    </DashboardShell>
+    </>
   );
 }
 

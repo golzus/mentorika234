@@ -1,8 +1,10 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { useAuth, signIn } from "@/lib/auth/auth-context";
+import { redirectAuthenticated } from "@/lib/auth/route-guards";
 
 export const Route = createFileRoute("/login")({
+  beforeLoad: redirectAuthenticated,
   head: () => ({
     meta: [{ title: "מנטוריקה — כניסה" }],
   }),

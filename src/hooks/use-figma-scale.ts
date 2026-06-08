@@ -3,55 +3,90 @@ import { useEffect, useState } from "react";
 export const FIGMA_WIDTH = 1650;
 export const FIGMA_HEIGHT = 870;
 
-/** 1024–1400px or height < 750px → compact (scaled canvas, vertical scroll) */
-const COMPACT_MAX_WIDTH = 1400;
-const COMPACT_MAX_HEIGHT = 750;
+const DESKTOP_MIN_WIDTH = 1024;
+const DESKTOP_SAFE_MARGIN = 0;
 
 export type FigmaLayout = {
   scale: number;
+  scaleX: number;
+  scaleY: number;
   compact: boolean;
   scaledWidth: number;
   scaledHeight: number;
 };
 
+function calculateLayout(width: number, height: number): FigmaLayout {
+  const compact = width < DESKTOP_MIN_WIDTH;
+
+  if (compact) {
+    const scale = width / FIGMA_WIDTH;
+    return {
+      scale,
+      scaleX: scale,
+      scaleY: scale,
+      compact: true,
+      scaledWidth: FIGMA_WIDTH * scale,
+      scaledHeight: FIGMA_HEIGHT * scale,
+    };
+  }
+
+  const availableWidth = Math.max(0, width - DESKTOP_SAFE_MARGIN * 2);
+  const availableHeight = Math.max(0, height - DESKTOP_SAFE_MARGIN * 2);
+  const scaleX = availableWidth / FIGMA_WIDTH;
+  const scaleY = availableHeight / FIGMA_HEIGHT;
+
+  return {
+    scale: Math.min(scaleX, scaleY),
+    scaleX,
+    scaleY,
+    compact: false,
+    scaledWidth: FIGMA_WIDTH * scaleX,
+    scaledHeight: FIGMA_HEIGHT * scaleY,
+  };
+}
+
+function isSameLayout(a: FigmaLayout, b: FigmaLayout) {
+  return (
+    a.compact === b.compact &&
+    Math.abs(a.scale - b.scale) < 0.001 &&
+    Math.abs(a.scaleX - b.scaleX) < 0.001 &&
+    Math.abs(a.scaleY - b.scaleY) < 0.001 &&
+    Math.abs(a.scaledWidth - b.scaledWidth) < 0.5 &&
+    Math.abs(a.scaledHeight - b.scaledHeight) < 0.5
+  );
+}
+
 export function useFigmaLayout(): FigmaLayout {
   const [layout, setLayout] = useState<FigmaLayout>({
     scale: 1,
+    scaleX: 1,
+    scaleY: 1,
     compact: false,
     scaledWidth: FIGMA_WIDTH,
     scaledHeight: FIGMA_HEIGHT,
   });
 
   useEffect(() => {
-    const update = () => {
-      const w = window.innerWidth;
-      const h = window.innerHeight;
+    let frameId: number | null = null;
 
-      const compact = w < COMPACT_MAX_WIDTH || h < COMPACT_MAX_HEIGHT;
-      if (compact) {
-        const scale = w / FIGMA_WIDTH;
-        setLayout({
-          scale,
-          compact: true,
-          scaledWidth: FIGMA_WIDTH * scale,
-          scaledHeight: FIGMA_HEIGHT * scale,
-        });
-      } else {
-        const scaleW = w / FIGMA_WIDTH;
-        const scaleH = h / FIGMA_HEIGHT;
-        const scale = Math.min(scaleW, scaleH);
-        setLayout({
-          scale,
-          compact: false,
-          scaledWidth: FIGMA_WIDTH * scale,
-          scaledHeight: FIGMA_HEIGHT * scale,
-        });
-      }
+    const update = () => {
+      if (frameId !== null) return;
+
+      frameId = window.requestAnimationFrame(() => {
+        frameId = null;
+        const next = calculateLayout(window.innerWidth, window.innerHeight);
+        setLayout((current) => (isSameLayout(current, next) ? current : next));
+      });
     };
 
     update();
     window.addEventListener("resize", update);
-    return () => window.removeEventListener("resize", update);
+    return () => {
+      window.removeEventListener("resize", update);
+      if (frameId !== null) {
+        window.cancelAnimationFrame(frameId);
+      }
+    };
   }, []);
 
   return layout;

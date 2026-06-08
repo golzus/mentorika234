@@ -9,7 +9,6 @@ import gaugeSvg from "@/assets/gauge-65.svg";
 import type { CSSProperties } from "react";
 import { useState } from "react";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
-import { DashboardShell } from "@/components/DashboardShell";
 import { LeadActionsBar } from "@/components/LeadActionsBar";
 import { useDashboardSummary } from "@/hooks/use-dashboard";
 import {
@@ -17,8 +16,9 @@ import {
   useDeleteMarketingGoal,
   useUpdateMarketingGoal,
 } from "@/hooks/use-marketing";
-import { useDeleteLead, useLeads, useUpdateLead } from "@/hooks/use-leads";
+import { useDeleteLead, useUpdateLead } from "@/hooks/use-leads";
 import { useAuth } from "@/lib/auth/auth-context";
+import { requireAuth } from "@/lib/auth/route-guards";
 import type {
   Lead,
   LeadUpdate,
@@ -28,6 +28,7 @@ import type {
 } from "@/lib/db/schemas";
 
 export const Route = createFileRoute("/")({
+  beforeLoad: requireAuth,
   head: () => ({
     meta: [
       { title: "מנטוריקה — ניהול לידים" },
@@ -123,20 +124,6 @@ function formatDate(date: string | null | undefined) {
   return new Intl.DateTimeFormat("he-IL").format(new Date(date));
 }
 
-function parsePrice(price: string | null | undefined) {
-  if (!price) return 0;
-  const normalized = price.replace(/[^\d.-]/g, "");
-  const parsed = Number(normalized);
-  return Number.isFinite(parsed) ? parsed : 0;
-}
-
-function isThisMonth(date: string | null | undefined) {
-  if (!date) return false;
-  const value = new Date(date);
-  const now = new Date();
-  return value.getMonth() === now.getMonth() && value.getFullYear() === now.getFullYear();
-}
-
 function formatCurrency(value: number) {
   return new Intl.NumberFormat("he-IL").format(value);
 }
@@ -153,7 +140,6 @@ function LeadsDashboard() {
     { mode: "add" } | { mode: "edit"; task: DashboardTask } | null
   >(null);
   const [deletingTask, setDeletingTask] = useState<DashboardTask | null>(null);
-  const { data: allLeads = [], isLoading: leadsLoading, isError: leadsError } = useLeads(user?.id);
   const updateLead = useUpdateLead(user?.id ?? "");
   const deleteLead = useDeleteLead(user?.id ?? "");
   const createTask = useCreateMarketingGoal(user?.id ?? "");
@@ -165,21 +151,19 @@ function LeadsDashboard() {
     isError: summaryError,
   } = useDashboardSummary(user?.id);
 
-  const negotiationLeads = allLeads.filter((lead) => lead.status === "in_progress");
-  const monthlyLeads = allLeads.filter((lead) => isThisMonth(lead.created_at)).slice(0, 3);
-  const monthlyRevenue = allLeads
-    .filter((lead) => lead.status === "closed" && isThisMonth(lead.updated_at || lead.created_at))
-    .reduce((sum, lead) => sum + parsePrice(lead.proposed_price), 0);
+  const negotiationLeads = summary?.negotiationLeads ?? [];
+  const monthlyLeads = summary?.monthlyLeads ?? [];
+  const monthlyRevenue = summary?.monthlyRevenue ?? 0;
   const monthlyTarget = summary?.profile?.monthly_salary_target ?? 0;
-  const isLoading = leadsLoading || summaryLoading;
-  const isError = leadsError || summaryError;
+  const isLoading = summaryLoading;
+  const isError = summaryError;
 
   return (
-    <DashboardShell active="מסך פתיחה" absoluteContent>
+    <>
       <LeadsSection
         leads={negotiationLeads}
-        isLoading={leadsLoading}
-        isError={leadsError}
+        isLoading={summaryLoading}
+        isError={summaryError}
         onEditLead={setEditingLead}
         onDeleteLead={setDeletingLead}
       />
@@ -198,8 +182,8 @@ function LeadsDashboard() {
       <MonthlyLeadsSection
         leads={monthlyLeads}
         total={summary?.leadsThisMonth ?? monthlyLeads.length}
-        isLoading={leadsLoading || summaryLoading}
-        isError={leadsError || summaryError}
+        isLoading={summaryLoading}
+        isError={summaryError}
       />
       <StatsSection
         categoryGoals={summary?.categoryGoals ?? {}}
@@ -252,7 +236,7 @@ function LeadsDashboard() {
           onCancel={() => setDeletingTask(null)}
         />
       )}
-    </DashboardShell>
+    </>
   );
 }
 
@@ -730,67 +714,61 @@ function MonthlyLeadsSection({
   isLoading: boolean;
   isError: boolean;
 }) {
-  const rowTops = [621, 672, 723];
+  const visibleLeads = leads.slice(0, 3);
 
   return (
-    <>
-      <div
-        className="absolute rounded-[10px] bg-white shadow-[0_10px_20px_rgba(0,0,0,0.1)]"
-        style={figmaRect(570, 570.5, 330, 210)}
-      />
-      <TealHeader left={570} top={570.5} width={330}>
+    <section
+      className="absolute overflow-hidden rounded-[10px] bg-white shadow-[0_10px_20px_rgba(0,0,0,0.12)]"
+      style={figmaRect(570, 570.5, 330, 210)}
+      dir="rtl"
+    >
+      <div className="flex h-[31px] items-center justify-center bg-[#00b6b5] text-[18px] font-bold leading-none text-[#0d0221]">
         לידים החודש
-      </TealHeader>
-
+      </div>
       {isLoading && (
-        <div
-          className="absolute text-center text-[16px] leading-[25px] text-[#0d0221]"
-          style={figmaRect(588, 674, 278, 25)}
-        >
+        <div className="flex h-[calc(100%-31px)] items-center justify-center text-center text-[16px] leading-[25px] text-[#0d0221]">
           טוען לידים...
         </div>
       )}
       {isError && (
-        <div
-          className="absolute text-center text-[16px] leading-[25px] text-[#f15a48]"
-          style={figmaRect(588, 674, 278, 25)}
-        >
+        <div className="flex h-[calc(100%-31px)] items-center justify-center text-center text-[16px] leading-[25px] text-[#f15a48]">
           שגיאה בטעינת לידים
         </div>
       )}
       {!isLoading && !isError && leads.length === 0 && (
-        <div
-          className="absolute text-center text-[16px] leading-[25px] text-[#0d0221]"
-          style={figmaRect(588, 674, 278, 25)}
-        >
+        <div className="flex h-[calc(100%-31px)] items-center justify-center text-center text-[16px] leading-[25px] text-[#0d0221]">
           אין לידים חדשים החודש
         </div>
       )}
 
       {!isLoading && !isError && leads.length > 0 && (
-        <div className="absolute text-right" style={figmaRect(600, 602, 250, 30)} dir="rtl">
-          <span className="text-[24px] font-bold leading-[30px] text-[#f15a48]">{total}</span>
-          <span className="mr-2 text-[14px] leading-[20px] text-[#0d0221]">לידים חדשים</span>
+        <div className="flex flex-col gap-[14px] px-[22px] pt-[22px]">
+          {visibleLeads.map((lead) => (
+            <div
+              key={lead.id}
+              className="flex h-[39px] items-center justify-center rounded-[5px] bg-white px-[10px] text-[#0d0221] shadow-[0_10px_20px_rgba(0,0,0,0.1)]"
+            >
+              <div className="grid w-full grid-cols-[minmax(58px,1fr)_1px_minmax(52px,0.9fr)_1px_minmax(72px,1.1fr)_1px_minmax(48px,0.8fr)] items-center gap-[7px] text-[12px] leading-[15px]">
+                <span className="truncate text-right text-[18px] font-bold leading-[25px]">
+                  {lead.name}
+                </span>
+                <span className="h-[9px] w-px bg-[#d9d9d9]" />
+                <span className="truncate text-right">{lead.source || "מקור"}</span>
+                <span className="h-[9px] w-px bg-[#d9d9d9]" />
+                <span className="truncate text-right">{lead.proposed_price || "הצעת מחיר"}</span>
+                <span className="h-[9px] w-px bg-[#d9d9d9]" />
+                <span className="truncate text-right">{formatDate(lead.created_at)}</span>
+              </div>
+            </div>
+          ))}
+          {total > visibleLeads.length && (
+            <div className="text-center text-[13px] font-bold leading-[18px] text-[#f15a48]">
+              ועוד {total - visibleLeads.length} לידים החודש
+            </div>
+          )}
         </div>
       )}
-
-      {leads.map((lead, i) => (
-        <div
-          key={lead.id}
-          className="absolute flex h-[39px] items-center gap-[5px]"
-          style={figmaRect(588, rowTops[i] + 15, 278.337, 39)}
-          dir="ltr"
-        >
-          <span className="w-[11px] text-center text-[12px] leading-none text-[#0d0221]">‹</span>
-          <div className="h-[9px] w-px bg-[#d9d9d9]" />
-          <span className="text-[12px] leading-[15px] text-[#0d0221]" dir="rtl">
-            {formatDate(lead.created_at)}
-          </span>
-          <div className="h-[9px] w-px bg-[#d9d9d9]" />
-          <span className="truncate text-[18px] leading-[25px] text-[#0d0221]">{lead.name}</span>
-        </div>
-      ))}
-    </>
+    </section>
   );
 }
 

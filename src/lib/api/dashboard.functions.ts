@@ -1,4 +1,5 @@
 import { supabase } from "@/lib/db/client";
+import type { Lead } from "@/lib/db/schemas";
 
 export type DashboardSummary = {
   leadsTotal: number;
@@ -6,6 +7,9 @@ export type DashboardSummary = {
   leadsNew: number;
   leadsInProgress: number;
   leadsClosed: number;
+  monthlyRevenue: number;
+  negotiationLeads: Lead[];
+  monthlyLeads: Lead[];
   marketingGoalsActive: number;
   marketingGoalsCompleted: number;
   weeklyTasks: { id: string; title: string; category: string; weekly_task: string | null }[];
@@ -18,9 +22,76 @@ export type DashboardSummary = {
   } | null;
 };
 
+const LEAD_SELECT =
+  "id, user_id, name, phone, email, source, interested_in, proposed_price, notes, status, created_at, updated_at";
+
+function parsePrice(price: string | null | undefined) {
+  if (!price) return 0;
+  const parsed = Number(price.replace(/[^\d.-]/g, ""));
+  return Number.isFinite(parsed) ? parsed : 0;
+}
+
 export async function getDashboardSummary(userId: string): Promise<DashboardSummary> {
-  const [leadsRes, marketingRes, profileRes] = await Promise.all([
-    supabase.from("leads").select("status, created_at").eq("user_id", userId),
+  const now = new Date();
+  const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+  const nextMonthStart = new Date(now.getFullYear(), now.getMonth() + 1, 1).toISOString();
+
+  const [
+    totalRes,
+    monthRes,
+    newRes,
+    inProgressRes,
+    closedRes,
+    monthlyClosedRes,
+    negotiationRes,
+    monthlyLeadsRes,
+    marketingRes,
+    profileRes,
+  ] = await Promise.all([
+    supabase.from("leads").select("id", { count: "exact", head: true }).eq("user_id", userId),
+    supabase
+      .from("leads")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", userId)
+      .gte("created_at", monthStart)
+      .lt("created_at", nextMonthStart),
+    supabase
+      .from("leads")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", userId)
+      .eq("status", "new"),
+    supabase
+      .from("leads")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", userId)
+      .eq("status", "in_progress"),
+    supabase
+      .from("leads")
+      .select("id", { count: "exact", head: true })
+      .eq("user_id", userId)
+      .eq("status", "closed"),
+    supabase
+      .from("leads")
+      .select("proposed_price")
+      .eq("user_id", userId)
+      .eq("status", "closed")
+      .gte("updated_at", monthStart)
+      .lt("updated_at", nextMonthStart),
+    supabase
+      .from("leads")
+      .select(LEAD_SELECT)
+      .eq("user_id", userId)
+      .eq("status", "in_progress")
+      .order("created_at", { ascending: false })
+      .limit(8),
+    supabase
+      .from("leads")
+      .select(LEAD_SELECT)
+      .eq("user_id", userId)
+      .gte("created_at", monthStart)
+      .lt("created_at", nextMonthStart)
+      .order("created_at", { ascending: false })
+      .limit(3),
     supabase
       .from("marketing_goals")
       .select("id, title, category, weekly_task, status")
@@ -32,16 +103,17 @@ export async function getDashboardSummary(userId: string): Promise<DashboardSumm
       .single(),
   ]);
 
-  if (leadsRes.error) throw leadsRes.error;
+  if (totalRes.error) throw totalRes.error;
+  if (monthRes.error) throw monthRes.error;
+  if (newRes.error) throw newRes.error;
+  if (inProgressRes.error) throw inProgressRes.error;
+  if (closedRes.error) throw closedRes.error;
+  if (monthlyClosedRes.error) throw monthlyClosedRes.error;
+  if (negotiationRes.error) throw negotiationRes.error;
+  if (monthlyLeadsRes.error) throw monthlyLeadsRes.error;
   if (marketingRes.error) throw marketingRes.error;
 
-  const leads = leadsRes.data ?? [];
   const goals = marketingRes.data ?? [];
-  const now = new Date();
-  const isCurrentMonth = (date: string) => {
-    const value = new Date(date);
-    return value.getMonth() === now.getMonth() && value.getFullYear() === now.getFullYear();
-  };
 
   const categoryGoals: Record<string, number> = {};
   for (const g of goals) {
@@ -51,11 +123,17 @@ export async function getDashboardSummary(userId: string): Promise<DashboardSumm
   }
 
   return {
-    leadsTotal: leads.length,
-    leadsThisMonth: leads.filter((l) => isCurrentMonth(l.created_at)).length,
-    leadsNew: leads.filter((l) => l.status === "new").length,
-    leadsInProgress: leads.filter((l) => l.status === "in_progress").length,
-    leadsClosed: leads.filter((l) => l.status === "closed").length,
+    leadsTotal: totalRes.count ?? 0,
+    leadsThisMonth: monthRes.count ?? 0,
+    leadsNew: newRes.count ?? 0,
+    leadsInProgress: inProgressRes.count ?? 0,
+    leadsClosed: closedRes.count ?? 0,
+    monthlyRevenue: (monthlyClosedRes.data ?? []).reduce(
+      (sum, lead) => sum + parsePrice(lead.proposed_price),
+      0,
+    ),
+    negotiationLeads: (negotiationRes.data ?? []) as Lead[],
+    monthlyLeads: (monthlyLeadsRes.data ?? []) as Lead[],
     marketingGoalsActive: goals.filter((g) => g.status === "active").length,
     marketingGoalsCompleted: goals.filter((g) => g.status === "completed").length,
     weeklyTasks: goals

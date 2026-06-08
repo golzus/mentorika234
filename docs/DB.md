@@ -23,7 +23,7 @@
 | `created_at` | timestamptz | חובה |
 | `updated_at` | timestamptz | חובה |
 
-**RLS:** `auth.uid() = id`
+**RLS:** `(select auth.uid()) = id` לכל פעולות המשתמש על הפרופיל שלו.
 
 ### `marketing_goals`
 
@@ -44,7 +44,7 @@
 | `created_by` | uuid | |
 | `updated_by` | uuid | |
 
-**RLS:** `auth.uid() = user_id`
+**RLS:** `(select auth.uid()) = user_id` ל-select/insert/update/delete של רשומות המשתמש.
 **Index:** `(user_id, category)`, `(user_id, target_date)`
 
 ### `leads`
@@ -66,7 +66,7 @@
 | `created_by` | uuid | |
 | `updated_by` | uuid | |
 
-**RLS:** `auth.uid() = user_id`
+**RLS:** `(select auth.uid()) = user_id` ל-select/insert/update/delete של רשומות המשתמש.
 **Index:** `(user_id, status)`, `(user_id, created_at DESC)`
 
 ## Phase 2 — תכנון בלבד (אסור ליצור)
@@ -104,6 +104,13 @@ projects → retention_clients (Phase 2)
 | שם | תאריך | תיאור |
 |-----|--------|--------|
 | 001_initial_schema | 2026-06-07 | יצירת profiles, marketing_goals, leads + RLS + indexes + triggers |
+| 20260608003900_security_rls_hardening | 2026-06-08 | הקשחת RLS עם `(select auth.uid())`, ביטול EXECUTE ל-`handle_new_user`, והגדרת `search_path` ל-`handle_updated_at` |
+
+## Security Notes
+
+- `public.handle_new_user()` מיועדת להפעלה דרך trigger בלבד; הרשאות EXECUTE הוסרו מ-`anon` ומ-`authenticated`.
+- `public.handle_updated_at()` מוגדרת עם `search_path = public` כדי למנוע תלות ב-search path של ה-role.
+- Leaked Password Protection היא הגדרת Supabase Auth חיצונית ל-SQL ויש להפעיל אותה ב-Dashboard: Authentication → Providers/Auth settings → Password protection.
 
 ## גיבויים
 

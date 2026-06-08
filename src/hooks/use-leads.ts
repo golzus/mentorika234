@@ -1,12 +1,24 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { listLeads, createLead, updateLead, deleteLead } from "@/lib/api/leads.functions";
+import {
+  listLeads,
+  createLead,
+  updateLead,
+  deleteLead,
+  type ListLeadsOptions,
+} from "@/lib/api/leads.functions";
 import type { Lead, LeadInsert, LeadStatus, LeadUpdate } from "@/lib/db/schemas";
 
-export function useLeads(userId: string | undefined, status?: LeadStatus) {
+export function useLeads(
+  userId: string | undefined,
+  statusOrOptions?: LeadStatus | ListLeadsOptions,
+) {
+  const options =
+    typeof statusOrOptions === "string" ? { status: statusOrOptions } : (statusOrOptions ?? {});
+
   return useQuery({
-    queryKey: ["leads", userId, { status }],
+    queryKey: ["leads", userId, options],
     queryFn: async () => {
-      const data = await listLeads(userId!, status);
+      const data = await listLeads(userId!, options);
       return data as Lead[];
     },
     enabled: !!userId,

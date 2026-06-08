@@ -1,5 +1,5 @@
-import { Link } from "@tanstack/react-router";
-import type { CSSProperties } from "react";
+import { Link, useLocation, useNavigate } from "@tanstack/react-router";
+import type { CSSProperties, ReactNode } from "react";
 import panelUnion from "@/assets/figma/panel-union.svg";
 import tipDivider from "@/assets/figma/tip-divider.svg";
 import logoMentorika from "@/assets/logo-mentorika-full.png";
@@ -11,7 +11,7 @@ import {
   useFigmaLayout,
 } from "@/hooks/use-figma-scale";
 import { useProfile } from "@/hooks/use-profile";
-import { useAuth } from "@/lib/auth/auth-context";
+import { signOut, useAuth } from "@/lib/auth/auth-context";
 
 const sideNav: { label: string; to: string | null }[] = [
   { label: "מסך פתיחה", to: "/" },
@@ -25,13 +25,28 @@ const sideNav: { label: string; to: string | null }[] = [
 ];
 
 const navItemBaseClass =
-  "flex h-[34px] w-[136px] items-center justify-center rounded-full text-center text-[18px] font-normal leading-[25px] text-[#0d0221]";
+  "flex h-[34px] w-[116px] items-center justify-center whitespace-nowrap rounded-full text-center text-[19px] font-normal leading-[25px] text-[#0d0221]";
 
 const activeNavItemClass = `${navItemBaseClass} bg-[#fffbf7]`;
 
 const navLinkClass = `${navItemBaseClass} transition-colors duration-150 ease-out hover:bg-[#fffbf7] focus-visible:bg-[#fffbf7] active:bg-[#fffbf7]`;
 
 const disabledNavItemClass = `${navItemBaseClass} cursor-default opacity-60`;
+const desktopFrameInset = 12;
+
+const routeSettings: Record<
+  string,
+  { active: string; breadcrumb?: string; absoluteContent?: boolean }
+> = {
+  "/": { active: "מסך פתיחה", absoluteContent: true },
+  "/profile": { active: "פרופיל העסק", breadcrumb: "פרופיל העסק" },
+  "/marketing": { active: "מעקב שיווק", breadcrumb: "מעקב שיווק" },
+  "/leads": { active: "מעקב לידים" },
+};
+
+function getRouteSettings(pathname: string) {
+  return routeSettings[pathname] ?? routeSettings["/"];
+}
 
 function figmaRect(left: number, top: number, width: number, height: number): CSSProperties {
   return {
@@ -43,17 +58,23 @@ function figmaRect(left: number, top: number, width: number, height: number): CS
 }
 
 export function DashboardShell({
-  active,
   children,
-  absoluteContent = false,
-  breadcrumb,
+  active: activeProp,
+  absoluteContent: absoluteContentProp,
+  breadcrumb: breadcrumbProp,
 }: {
-  active: string;
-  children: React.ReactNode;
+  children: ReactNode;
+  active?: string;
   absoluteContent?: boolean;
   breadcrumb?: string;
 }) {
-  const { scale, compact, scaledWidth, scaledHeight } = useFigmaLayout();
+  const location = useLocation();
+  const currentRouteSettings = getRouteSettings(location.pathname);
+  const active = activeProp ?? currentRouteSettings.active;
+  const absoluteContent = absoluteContentProp ?? currentRouteSettings.absoluteContent ?? false;
+  const breadcrumb = breadcrumbProp ?? currentRouteSettings.breadcrumb;
+  const { scaleX, scaleY, compact, scaledWidth, scaledHeight } = useFigmaLayout();
+  const navigate = useNavigate();
   const { user } = useAuth();
   const { data: profile } = useProfile(user?.id);
   const metadata = user?.user_metadata ?? {};
@@ -73,45 +94,68 @@ export function DashboardShell({
   }).format(new Date());
   useFigmaCompactClass(compact);
 
+  const handleSignOut = async () => {
+    await signOut();
+    navigate({ to: "/login" });
+  };
+
   return (
     <div className={`dashboard-viewport${compact ? " dashboard-viewport--compact" : ""}`} dir="rtl">
       <div className="relative shrink-0" style={{ width: scaledWidth, height: scaledHeight }}>
+        {!compact && (
+          <img
+            src={panelUnion}
+            alt=""
+            className="absolute"
+            style={{
+              left: desktopFrameInset,
+              top: desktopFrameInset,
+              width: `calc(100% - ${desktopFrameInset * 2}px)`,
+              height: `calc(100% - ${desktopFrameInset * 2}px)`,
+            }}
+          />
+        )}
         <div
-          className="absolute left-0 top-0 bg-[#00b6b5]"
+          className="absolute left-0 top-0"
           style={{
             width: FIGMA_WIDTH,
             height: FIGMA_HEIGHT,
-            transform: `scale(${scale})`,
+            backgroundColor: compact ? "#00b6b5" : "transparent",
+            transform: `scale(${scaleX}, ${scaleY})`,
             transformOrigin: "top left",
             overflow: compact ? "visible" : "hidden",
           }}
         >
-          <img src={panelUnion} alt="" className="absolute" style={figmaRect(30, 30, 1590, 810)} />
+          {compact && (
+            <img src={panelUnion} alt="" className="absolute" style={figmaRect(30, 30, 1590, 810)} />
+          )}
 
           {active === "מסך פתיחה" && (
-            <div className="absolute z-30" style={figmaRect(25, -91, 104, 337)}>
-              <div className="flex h-full w-full items-center justify-center">
-                <div className="-rotate-90">
-                  <div className="h-[104px] w-[337px] rounded-[10px] bg-[#f15a48] shadow-[0_15px_30px_rgba(0,0,0,0.1)]" />
-                </div>
-              </div>
-              <div className="absolute left-1/2 top-[31px] w-[90px] -translate-x-1/2 -translate-y-1/2 text-center text-[18px] font-bold leading-[20px] text-[#fffbf7]">
+            <div
+              className="absolute z-30 box-border flex flex-col items-center overflow-hidden rounded-[10px] bg-[#f15a48] px-[7px] pt-[21px] shadow-[0_15px_30px_rgba(0,0,0,0.1)]"
+              style={figmaRect(25, 8, 104, 337)}
+            >
+              <p className="m-0 w-full text-center text-[18px] font-bold leading-[20px] text-[#fffbf7]">
                 הטיפ היומי
-              </div>
-              <img
-                src={tipDivider}
-                alt=""
-                className="absolute left-[7px] top-[71px] h-px w-[90px]"
-              />
-              <div className="absolute left-1/2 top-[158.5px] w-[89px] -translate-x-1/2 -translate-y-1/2 text-center text-[18px] font-normal leading-[25px] text-[#fffbf7]">
-                עקבי אחרי המספרים -
+              </p>
+              <img src={tipDivider} alt="" className="mt-[29px] h-px w-[90px] shrink-0" />
+              <p className="m-0 mt-[11px] w-full text-center text-[18px] font-normal leading-[25px] text-[#fffbf7]">
+                עקבי אחרי
                 <br />
-                הם מספרים את הסיפור האמיתי
-              </div>
+                המספרים -
+                <br />
+                הם
+                <br />
+                מספרים
+                <br />
+                את הסיפור
+                <br />
+                האמיתי
+              </p>
             </div>
           )}
 
-          <nav className="absolute z-20 pl-2" style={figmaRect(1500, 150.5, 120, 620)}>
+          <nav className="absolute z-20" style={figmaRect(1504, 150.5, 116, 620)}>
             {active === "מסך פתיחה" ? (
               <div className={`absolute -top-[36px] right-0 ${activeNavItemClass}`}>מסך פתיחה</div>
             ) : (
@@ -158,6 +202,14 @@ export function DashboardShell({
               alt="מנטוריקה"
               className="absolute left-[120px] top-0 h-[66px] w-auto"
             />
+            <button
+              type="button"
+              onClick={handleSignOut}
+              className="absolute left-0 top-[14px] rounded-full border border-[#0d0221]/20 bg-white/70 px-4 py-1.5 text-[13px] font-bold text-[#0d0221] transition-colors hover:bg-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-[#f15a48]"
+              dir="rtl"
+            >
+              יציאה
+            </button>
             <div className="absolute right-0 top-0 text-right" dir="rtl">
               <div className="flex items-baseline justify-end gap-4">
                 <span className="text-[18px] leading-[25px] text-[#0d0221]">{todayLabel}</span>

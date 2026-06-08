@@ -1,14 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Plus, X, Loader2 } from "lucide-react";
 import { useState } from "react";
-import { DashboardShell } from "@/components/DashboardShell";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { LeadActionsBar } from "@/components/LeadActionsBar";
 import { useAuth } from "@/lib/auth/auth-context";
+import { requireAuth } from "@/lib/auth/route-guards";
 import { useLeads, useCreateLead, useUpdateLead, useDeleteLead } from "@/hooks/use-leads";
 import type { Lead, LeadInsert, LeadStatus, LeadUpdate } from "@/lib/db/schemas";
 
 export const Route = createFileRoute("/leads")({
+  beforeLoad: requireAuth,
   head: () => ({
     meta: [
       { title: "מנטוריקה — מעקב לידים" },
@@ -59,7 +60,7 @@ function LeadsPage() {
   };
 
   return (
-    <DashboardShell active="מעקב לידים">
+    <>
       <div className="flex h-full w-full flex-col gap-[2%]" dir="rtl">
         {/* ── Tab bar ─────────────────────────────────────────── */}
         <div className="flex shrink-0 items-stretch gap-[6px]">
@@ -197,7 +198,7 @@ function LeadsPage() {
           }}
         />
       )}
-    </DashboardShell>
+    </>
   );
 }
 

@@ -4,9 +4,11 @@ import {
   Link,
   createRootRouteWithContext,
   useRouter,
+  useLocation,
   HeadContent,
   Scripts,
 } from "@tanstack/react-router";
+import { DashboardShell } from "@/components/DashboardShell";
 import { AuthProvider } from "@/lib/auth/auth-context";
 
 import appCss from "../styles.css?url";
@@ -135,11 +137,19 @@ function RootShell({ children }: { children: React.ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const location = useLocation();
+  const isLoginRoute = location.pathname === "/login";
 
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <Outlet />
+        {isLoginRoute ? (
+          <Outlet />
+        ) : (
+          <DashboardShell>
+            <Outlet />
+          </DashboardShell>
+        )}
       </AuthProvider>
     </QueryClientProvider>
   );

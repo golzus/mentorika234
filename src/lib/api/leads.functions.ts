@@ -1,12 +1,38 @@
 import { supabase } from "@/lib/db/client";
-import type { LeadInsert, LeadStatus, LeadUpdate } from "@/lib/db/schemas";
+import {
+  leadInsertSchema,
+  leadUpdateSchema,
+  type LeadInsert,
+  type LeadStatus,
+  type LeadUpdate,
+} from "@/lib/db/schemas";
+import { parseInput } from "@/lib/validation";
 
-export async function listLeads(userId: string, status?: LeadStatus) {
+const LEAD_SELECT =
+  "id, user_id, name, phone, email, source, interested_in, proposed_price, notes, status, created_at, updated_at";
+
+export type ListLeadsOptions = {
+  status?: LeadStatus;
+  page?: number;
+  pageSize?: number;
+};
+
+function getRange(page = 1, pageSize = 50) {
+  const safePage = Math.max(1, page);
+  const safePageSize = Math.min(Math.max(1, pageSize), 100);
+  const from = (safePage - 1) * safePageSize;
+  return { from, to: from + safePageSize - 1 };
+}
+
+export async function listLeads(userId: string, options: ListLeadsOptions = {}) {
+  const { status, page, pageSize } = options;
+  const { from, to } = getRange(page, pageSize);
   let query = supabase
     .from("leads")
-    .select("*")
+    .select(LEAD_SELECT)
     .eq("user_id", userId)
-    .order("created_at", { ascending: false });
+    .order("created_at", { ascending: false })
+    .range(from, to);
 
   if (status) {
     query = query.eq("status", status);
@@ -17,10 +43,23 @@ export async function listLeads(userId: string, status?: LeadStatus) {
   return data ?? [];
 }
 
-export async function createLead(userId: string, input: LeadInsert) {
+export async function listRecentLeads(userId: string, limit = 3) {
   const { data, error } = await supabase
     .from("leads")
-    .insert({ ...input, user_id: userId, created_by: userId })
+    .select(LEAD_SELECT)
+    .eq("user_id", userId)
+    .order("created_at", { ascending: false })
+    .limit(Math.min(Math.max(1, limit), 20));
+
+  if (error) throw error;
+  return data ?? [];
+}
+
+export async function createLead(userId: string, input: LeadInsert) {
+  const validInput = parseInput(leadInsertSchema, input);
+  const { data, error } = await supabase
+    .from("leads")
+    .insert({ ...validInput, user_id: userId, created_by: userId })
     .select()
     .single();
 
@@ -29,9 +68,10 @@ export async function createLead(userId: string, input: LeadInsert) {
 }
 
 export async function updateLead(leadId: string, userId: string, updates: LeadUpdate) {
+  const validUpdates = parseInput(leadUpdateSchema, updates);
   const { data, error } = await supabase
     .from("leads")
-    .update({ ...updates, updated_by: userId })
+    .update({ ...validUpdates, updated_by: userId })
     .eq("id", leadId)
     .eq("user_id", userId)
     .select()

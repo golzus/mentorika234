@@ -2,9 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Plus, X, Calendar, ChevronDown, Pencil, Trash2, Loader2 } from "lucide-react";
 import { useState } from "react";
 import { createPortal } from "react-dom";
-import { DashboardShell } from "@/components/DashboardShell";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { useAuth } from "@/lib/auth/auth-context";
+import { requireAuth } from "@/lib/auth/route-guards";
 import {
   useMarketingGoals,
   useCreateMarketingGoal,
@@ -15,6 +15,7 @@ import {
 import type { MarketingCategory, MarketingGoal, ActionItem } from "@/lib/db/schemas";
 
 export const Route = createFileRoute("/marketing")({
+  beforeLoad: requireAuth,
   head: () => ({
     meta: [
       { title: "מנטוריקה — מעקב שיווק" },
@@ -54,7 +55,7 @@ function MarketingPage() {
   const totalActive = activeGoals.length;
 
   return (
-    <DashboardShell active="מעקב שיווק" breadcrumb="מעקב שיווק">
+    <>
       <div className="flex h-full flex-col">
         {/* ── Tab bar ──────────────────────────────────────────── */}
         <div
@@ -179,7 +180,7 @@ function MarketingPage() {
           onClose={() => setEditingGoal(null)}
         />
       )}
-    </DashboardShell>
+    </>
   );
 }
 

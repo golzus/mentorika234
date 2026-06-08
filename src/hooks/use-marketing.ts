@@ -5,6 +5,7 @@ import {
   updateMarketingGoal,
   deleteMarketingGoal,
   toggleAction,
+  type ListMarketingGoalsOptions,
 } from "@/lib/api/marketing.functions";
 import type {
   ActionItem,
@@ -14,11 +15,19 @@ import type {
   MarketingGoalUpdate,
 } from "@/lib/db/schemas";
 
-export function useMarketingGoals(userId: string | undefined, category?: MarketingCategory) {
+export function useMarketingGoals(
+  userId: string | undefined,
+  categoryOrOptions?: MarketingCategory | ListMarketingGoalsOptions,
+) {
+  const options =
+    typeof categoryOrOptions === "string"
+      ? { category: categoryOrOptions }
+      : (categoryOrOptions ?? {});
+
   return useQuery({
-    queryKey: ["marketing", userId, { category }],
+    queryKey: ["marketing", userId, options],
     queryFn: async () => {
-      const data = await listMarketingGoals(userId!, category);
+      const data = await listMarketingGoals(userId!, options);
       return data as MarketingGoal[];
     },
     enabled: !!userId,
