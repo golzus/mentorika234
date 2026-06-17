@@ -3,8 +3,8 @@ import { useEffect, useState } from "react";
 export const FIGMA_WIDTH = 1650;
 export const FIGMA_HEIGHT = 870;
 
-const DESKTOP_MIN_WIDTH = 1024;
-const DESKTOP_SAFE_MARGIN = 0;
+const COMPACT_MAX_WIDTH = 768;
+const SAFE_MARGIN = 0;
 
 export type FigmaLayout = {
   scale: number;
@@ -16,10 +16,12 @@ export type FigmaLayout = {
 };
 
 function calculateLayout(width: number, height: number): FigmaLayout {
-  const compact = width < DESKTOP_MIN_WIDTH;
+  const availableWidth = Math.max(0, width - SAFE_MARGIN * 2);
+  const availableHeight = Math.max(0, height - SAFE_MARGIN * 2);
 
-  if (compact) {
-    const scale = width / FIGMA_WIDTH;
+  // Below tablet width: scale to fit width only (allow vertical scroll).
+  if (width < COMPACT_MAX_WIDTH) {
+    const scale = availableWidth / FIGMA_WIDTH;
     return {
       scale,
       scaleX: scale,
@@ -30,18 +32,19 @@ function calculateLayout(width: number, height: number): FigmaLayout {
     };
   }
 
-  const availableWidth = Math.max(0, width - DESKTOP_SAFE_MARGIN * 2);
-  const availableHeight = Math.max(0, height - DESKTOP_SAFE_MARGIN * 2);
-  const scaleX = availableWidth / FIGMA_WIDTH;
-  const scaleY = availableHeight / FIGMA_HEIGHT;
+  // Tablet and up: uniform scale to fit within viewport (preserve aspect ratio).
+  const scale = Math.min(
+    availableWidth / FIGMA_WIDTH,
+    availableHeight / FIGMA_HEIGHT,
+  );
 
   return {
-    scale: Math.min(scaleX, scaleY),
-    scaleX,
-    scaleY,
+    scale,
+    scaleX: scale,
+    scaleY: scale,
     compact: false,
-    scaledWidth: FIGMA_WIDTH * scaleX,
-    scaledHeight: FIGMA_HEIGHT * scaleY,
+    scaledWidth: FIGMA_WIDTH * scale,
+    scaledHeight: FIGMA_HEIGHT * scale,
   };
 }
 
