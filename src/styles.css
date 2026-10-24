@@ -95,32 +95,105 @@
   background: #d94e3e;
 }
 
-/* Sidebar nav — every item has the same box (size, padding, weight), so hover
-   only changes colors and nothing shifts. The active item is a white pill that
-   extends past the sidebar's left edge into the canvas gap, as in the Figma design. */
+/*
+ * Sidebar nav — scooped active/hover tab (RTL, sidebar on the right).
+ * Flat left → canvas · round right → teal · ::before/::after → concave corners.
+ *
+ * Teal fringe between the white pill and the scoops: the pseudos sat exactly on
+ * the edge and sub-pixels showed the parent teal. Scoops now overlap the pill
+ * by 2px so white is continuous into the curves.
+ */
+.nav-list {
+  --nav-r: 36px;
+  --scoop: 18px;
+  --canvas: #fffbf7;
+  /* Equal gaps that shrink with available height so the logo always fits */
+  flex: 1 1 auto;
+  min-height: 0;
+  justify-content: space-between;
+  gap: 0;
+}
+
 .nav-link,
 .nav-active-pill {
+  position: relative;
   display: block;
-  width: calc(100% + 18px);
-  margin-left: -18px;
-  padding: 8px 14px 8px 18px;
-  border-radius: 10px;
-  transition:
-    background-color 150ms ease-out,
-    box-shadow 150ms ease-out;
-}
-.nav-link {
+  box-sizing: border-box;
+  width: 100%;
+  flex-shrink: 0;
+  padding: 10px 14px 10px 18px;
+  border: 0;
+  border-radius: 0;
+  outline: none;
+  box-shadow: none;
   font-weight: 400;
+  transition: background-color 160ms ease-out;
 }
+
+.nav-active-pill {
+  font-weight: 700;
+}
+
+.nav-active-pill,
 a.nav-link:hover,
 a.nav-link:focus-visible {
-  background: rgba(255, 255, 255, 0.28);
+  z-index: 20;
+  width: calc(100% + 2px);
+  margin-left: -2px;
+  background: var(--canvas);
+  border-radius: 0 var(--nav-r) var(--nav-r) 0;
   outline: none;
 }
-.nav-active-pill {
-  background: #fff;
-  font-weight: 700;
-  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
+
+.nav-active-pill::before,
+.nav-active-pill::after,
+a.nav-link:hover::before,
+a.nav-link:hover::after,
+a.nav-link:focus-visible::before,
+a.nav-link:focus-visible::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  width: var(--scoop);
+  /* Extend into the pill so the white scoop shadow meets the white body (no teal gap) */
+  height: calc(var(--scoop) + 3px);
+  background: transparent;
+  pointer-events: none;
+}
+
+.nav-active-pill::before,
+a.nav-link:hover::before,
+a.nav-link:focus-visible::before {
+  top: calc(var(--scoop) * -1);
+  border-bottom-left-radius: var(--scoop);
+  box-shadow: -12px 0 0 0 var(--canvas);
+}
+
+.nav-active-pill::after,
+a.nav-link:hover::after,
+a.nav-link:focus-visible::after {
+  bottom: calc(var(--scoop) * -1);
+  border-top-left-radius: var(--scoop);
+  box-shadow: -12px 0 0 0 var(--canvas);
+}
+
+@media (max-width: 1023px) {
+  .nav-active-pill,
+  a.nav-link:hover,
+  a.nav-link:focus-visible {
+    width: 100%;
+    margin-left: 0;
+    border-radius: 12px;
+  }
+
+  .nav-active-pill::before,
+  .nav-active-pill::after,
+  a.nav-link:hover::before,
+  a.nav-link:hover::after,
+  a.nav-link:focus-visible::before,
+  a.nav-link:focus-visible::after {
+    display: none;
+  }
 }
 
 @layer base {

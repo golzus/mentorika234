@@ -31,12 +31,11 @@ function getRouteSettings(pathname: string) {
   return routeSettings[pathname] ?? routeSettings["/"];
 }
 
-// Active item = white pill that extends past the sidebar's left edge into the canvas gap,
-// giving the "tab clicked into the main area" look from the Figma design.
-const navBase = "whitespace-nowrap text-right text-[18px] leading-[25px] text-[#0d0221]";
+const navBase =
+  "relative z-10 block w-full whitespace-nowrap text-right text-[18px] leading-[25px] text-[#0d0221]";
 const navActive = `${navBase} nav-active-pill`;
 const navLink = `${navBase} nav-link`;
-const navDisabled = `${navBase} nav-link cursor-default opacity-60`;
+const navDisabled = `${navBase} nav-link cursor-default opacity-55`;
 
 export function DashboardShell({
   children,
@@ -86,49 +85,33 @@ export function DashboardShell({
     navigate({ to: "/login" });
   };
 
-  // Outer: teal frame with padding — everything sits inside this teal background.
-  const outerClass = fillViewport
-    ? "flex min-h-screen bg-[#00b6b5] p-3 md:p-6 lg:h-screen lg:overflow-hidden"
-    : "flex min-h-screen bg-[#00b6b5] p-3 md:p-6";
-
-  // Row wrapper — sidebar on RTL start (right visually), white canvas on RTL end (left).
-  const rowClass = fillViewport
-    ? "mx-auto flex w-full max-w-[1650px] flex-1 flex-col gap-3 lg:min-h-0 lg:flex-row lg:gap-4 lg:overflow-hidden"
-    : "mx-auto flex w-full max-w-[1650px] flex-col gap-3 lg:flex-row lg:gap-4";
-
-  // Inner white "canvas" — header + main content live inside this rounded card.
-  // Sidebar sits outside on the teal frame directly.
-  const canvasClass = fillViewport
-    ? "relative flex min-w-0 flex-1 flex-col overflow-hidden rounded-[16px] bg-[#fffbf7] shadow-[0_20px_40px_rgba(0,0,0,0.15)] lg:min-h-0"
-    : "relative flex min-w-0 flex-1 flex-col rounded-[16px] bg-[#fffbf7] shadow-[0_20px_40px_rgba(0,0,0,0.15)]";
-
-  const bodyClass = fillViewport
-    ? "flex flex-1 flex-col px-3 pb-4 md:px-6 lg:min-h-0 lg:overflow-hidden"
-    : "flex flex-col px-3 pb-8 md:px-6";
-
-  const mainClass = fillViewport
-    ? "min-w-0 flex-1 pt-2 md:pt-3 lg:overflow-hidden"
-    : "min-w-0 flex-1 pt-2 md:pt-4";
-
+  // Stable chrome on desktop: always lock to the viewport so the sidebar never
+  // jumps when switching between fillViewport pages and scrollable pages.
+  // Only the white canvas scrolls; the teal frame + nav stay fixed.
   return (
-    <div className={outerClass} dir="rtl">
-      <div className={rowClass}>
-        {/* Sidebar — sits on the teal frame directly (no background of its own).
-           Mobile: hidden here, replaced by a drawer above the canvas. */}
-        {/* Sticky + viewport-height on desktop so the menu stays put while the page scrolls. */}
-        <aside className="hidden shrink-0 flex-col items-start overflow-visible pt-6 lg:sticky lg:top-6 lg:flex lg:h-[calc(100vh-48px)] lg:w-[150px] lg:self-start xl:pt-10">
-          <NavList active={active} />
-          <img
-            src={logoZahavi}
-            alt="זהבי הסגל"
-            className="mt-auto h-[56px] w-auto self-center object-contain pb-4 xl:h-[68px]"
-          />
+    <div
+      className="flex min-h-screen bg-[#00b6b5] p-3 md:p-6 lg:h-svh lg:overflow-hidden"
+      dir="rtl"
+    >
+      <div className="mx-auto flex w-full max-w-[1650px] flex-1 flex-col gap-3 lg:min-h-0 lg:flex-row lg:gap-0">
+        {/* Desktop sidebar — fixed height inside the locked shell; never scrolls with page content.
+            overflow-visible so scooped active corners are not clipped. */}
+        <aside className="relative z-10 hidden shrink-0 flex-col items-stretch overflow-visible pt-8 lg:flex lg:h-full lg:w-[148px] lg:self-stretch xl:w-[160px] xl:pt-10">
+          <div className="flex min-h-0 flex-1 flex-col gap-4 pb-2">
+            <NavList active={active} />
+            <img
+              src={logoZahavi}
+              alt="זהבי הסגל"
+              className="h-[56px] w-auto shrink-0 self-center object-contain xl:h-[64px]"
+            />
+          </div>
         </aside>
 
-        <div className={canvasClass}>
+        {/* Flat on the sidebar side so the scooped active tab docks flush into the canvas */}
+        <div className="relative flex min-w-0 flex-1 flex-col overflow-hidden rounded-[16px] bg-[#fffbf7] shadow-[0_20px_40px_rgba(0,0,0,0.15)] lg:min-h-0 lg:rounded-r-none">
           {/* Daily tip badge — floats in the top-left corner of the white canvas on the home page only */}
           {showDailyTip && (
-            <div className="pointer-events-none absolute left-2 top-2 hidden h-[280px] w-[104px] lg:block">
+            <div className="pointer-events-none absolute left-2 top-2 z-20 hidden h-[280px] w-[104px] lg:block">
               <div
                 className="pointer-events-auto flex h-full flex-col items-center gap-3 rounded-[10px] bg-[#f15a48] px-2 py-4 text-[#fffbf7] shadow-[0_15px_30px_rgba(0,0,0,0.15)]"
                 dir="rtl"
@@ -170,7 +153,7 @@ export function DashboardShell({
                 </div>
               </div>
 
-              {/* Left group: logo (visually on the left of the header) + mobile menu toggle */}
+              {/* Left group: logo + mobile menu toggle */}
               <div className="flex items-center gap-3">
                 <img src={logoMentorika} alt="מנטוריקה" className="h-10 w-auto md:h-14" />
                 <button
@@ -185,7 +168,7 @@ export function DashboardShell({
             </div>
           </header>
 
-          {/* Mobile drawer (nav lives here on small screens since the sidebar is desktop-only) */}
+          {/* Mobile drawer */}
           {mobileNavOpen && (
             <div className="px-3 pb-3 lg:hidden">
               <div className="flex flex-col items-stretch gap-2 rounded-2xl bg-[#00b6b5] p-3 shadow-xl">
@@ -201,12 +184,26 @@ export function DashboardShell({
             </div>
           )}
 
-          {/* Main content */}
-          <div className={bodyClass}>
-            <main className={mainClass}>{children}</main>
+          {/* Main content — only this region scrolls on desktop */}
+          <div
+            className={
+              fillViewport
+                ? "flex min-h-0 flex-1 flex-col px-3 pb-4 md:px-6 lg:overflow-hidden"
+                : "flex min-h-0 flex-1 flex-col overflow-y-auto px-3 pb-8 md:px-6"
+            }
+          >
+            <main
+              className={
+                fillViewport
+                  ? "min-w-0 flex-1 pt-2 md:pt-3 lg:min-h-0 lg:overflow-hidden"
+                  : "min-w-0 flex-1 pt-2 md:pt-4"
+              }
+            >
+              {children}
+            </main>
           </div>
 
-          {/* Footer credits — matches Figma */}
+          {/* Footer credits */}
           <footer className="shrink-0 border-t border-[#0d0221]/5 px-4 py-2 md:px-8">
             <div className="flex flex-wrap items-center justify-center gap-x-6 gap-y-1 text-[11px] text-[#0d0221]/80 md:text-[12px]">
               <span>
@@ -223,11 +220,7 @@ export function DashboardShell({
 
 function NavList({ active }: { active: string }) {
   return (
-    <nav
-      className="flex w-full flex-col items-stretch"
-      style={{ gap: "clamp(8px, 3vh, 30px)" }}
-      dir="rtl"
-    >
+    <nav className="nav-list flex w-full flex-col items-stretch" dir="rtl">
       {sideNav.map((item) => {
         if (item.label === active) {
           return (

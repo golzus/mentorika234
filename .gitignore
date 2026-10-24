@@ -10,7 +10,8 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
-.output
+# .output is committed: Render serves the prebuilt client + server (see render.yaml)
+!.output/server/node_modules/
 .vinxi
 .tanstack/**
 .lovable
