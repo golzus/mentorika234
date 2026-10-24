@@ -11,6 +11,14 @@ if (!supabaseUrl || !supabaseAnonKey) {
   );
 }
 
+// VITE_* values are inlined at build time, so a bad value in the host's env only shows up here.
+if (!/^https?:\/\//i.test(supabaseUrl.trim())) {
+  throw new Error(
+    `VITE_SUPABASE_URL must start with https:// (got ${JSON.stringify(supabaseUrl)}). ` +
+      "Fix it in the host's environment variables and rebuild.",
+  );
+}
+
 export const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   auth: {
     persistSession: true,
