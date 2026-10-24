@@ -7,22 +7,16 @@ import {
   type LeadUpdate,
 } from "@/lib/db/schemas";
 import { parseInput } from "@/lib/validation";
+import { getRange } from "@/lib/api/pagination";
 
-const LEAD_SELECT =
-  "id, user_id, name, phone, email, source, interested_in, proposed_price, notes, status, created_at, updated_at";
+export const LEAD_SELECT =
+  "id, user_id, name, phone, email, source, interested_in, proposed_price, notes, next_task, status, created_at, updated_at";
 
 export type ListLeadsOptions = {
   status?: LeadStatus;
   page?: number;
   pageSize?: number;
 };
-
-function getRange(page = 1, pageSize = 50) {
-  const safePage = Math.max(1, page);
-  const safePageSize = Math.min(Math.max(1, pageSize), 100);
-  const from = (safePage - 1) * safePageSize;
-  return { from, to: from + safePageSize - 1 };
-}
 
 export async function listLeads(userId: string, options: ListLeadsOptions = {}) {
   const { status, page, pageSize } = options;

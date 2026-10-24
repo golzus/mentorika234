@@ -112,6 +112,7 @@ export const leadSchema = z.object({
   interested_in: z.string().nullable().optional(),
   proposed_price: z.string().nullable().optional(),
   notes: z.string().nullable().optional(),
+  next_task: z.string().nullable().optional(),
   status: leadStatusSchema.default("new"),
   created_at: z.string(),
   updated_at: z.string(),
@@ -127,6 +128,7 @@ export const leadInsertSchema = z.object({
   interested_in: z.string().optional(),
   proposed_price: z.string().optional(),
   notes: z.string().optional(),
+  next_task: z.string().optional(),
   status: leadStatusSchema.default("new"),
 });
 

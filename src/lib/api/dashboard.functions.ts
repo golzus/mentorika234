@@ -1,5 +1,7 @@
 import { supabase } from "@/lib/db/client";
 import type { Lead } from "@/lib/db/schemas";
+import { LEAD_SELECT } from "@/lib/api/leads.functions";
+import { parseLeadPrice } from "@/lib/format";
 
 export type DashboardSummary = {
   leadsTotal: number;
@@ -21,15 +23,6 @@ export type DashboardSummary = {
     new_clients_target: number | null;
   } | null;
 };
-
-const LEAD_SELECT =
-  "id, user_id, name, phone, email, source, interested_in, proposed_price, notes, status, created_at, updated_at";
-
-function parsePrice(price: string | null | undefined) {
-  if (!price) return 0;
-  const parsed = Number(price.replace(/[^\d.-]/g, ""));
-  return Number.isFinite(parsed) ? parsed : 0;
-}
 
 export async function getDashboardSummary(userId: string): Promise<DashboardSummary> {
   const now = new Date();
@@ -129,7 +122,7 @@ export async function getDashboardSummary(userId: string): Promise<DashboardSumm
     leadsInProgress: inProgressRes.count ?? 0,
     leadsClosed: closedRes.count ?? 0,
     monthlyRevenue: (monthlyClosedRes.data ?? []).reduce(
-      (sum, lead) => sum + parsePrice(lead.proposed_price),
+      (sum, lead) => sum + parseLeadPrice(lead.proposed_price),
       0,
     ),
     negotiationLeads: (negotiationRes.data ?? []) as Lead[],

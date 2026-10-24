@@ -9,6 +9,7 @@ import {
   type ActionItem,
 } from "@/lib/db/schemas";
 import { parseInput } from "@/lib/validation";
+import { getRange } from "@/lib/api/pagination";
 
 const MARKETING_GOAL_SELECT =
   "id, user_id, category, title, description, measurable_target, target_date, actions, weekly_task, status, created_at, updated_at";
@@ -18,13 +19,6 @@ export type ListMarketingGoalsOptions = {
   page?: number;
   pageSize?: number;
 };
-
-function getRange(page = 1, pageSize = 50) {
-  const safePage = Math.max(1, page);
-  const safePageSize = Math.min(Math.max(1, pageSize), 100);
-  const from = (safePage - 1) * safePageSize;
-  return { from, to: from + safePageSize - 1 };
-}
 
 export async function listMarketingGoals(userId: string, options: ListMarketingGoalsOptions = {}) {
   const { category, page, pageSize } = options;

@@ -56,23 +56,21 @@ function MarketingPage() {
 
   return (
     <>
-      <div className="flex h-full flex-col">
+      <div className="flex flex-col gap-4">
         {/* ── Tab bar ──────────────────────────────────────────── */}
         <div
-          className="mb-[14px] flex shrink-0 items-stretch overflow-hidden rounded-[10px] border border-[#e7e7e7] bg-white shadow-[0_2px_8px_rgba(0,0,0,0.04)]"
+          className="grid grid-cols-2 gap-1 overflow-hidden rounded-[10px] border border-[#e7e7e7] bg-white p-1 shadow-[0_2px_8px_rgba(0,0,0,0.04)] sm:grid-cols-3 lg:grid-cols-6 lg:gap-0 lg:p-0"
           dir="ltr"
         >
-          {tabs.map((label, i) => {
+          {tabs.map((label) => {
             const isActive = label === activeTab;
             return (
               <button
                 key={label}
                 type="button"
                 onClick={() => setActiveTab(label)}
-                className={`flex h-[40px] flex-1 cursor-pointer items-center justify-center text-[17px] font-medium transition-colors ${
-                  isActive
-                    ? "rounded-[8px] bg-[#f15a48] font-bold text-white"
-                    : `text-[#444] hover:bg-[#fafafa] ${i === 0 ? "" : "border-l border-[#f0c8c0]"}`
+                className={`flex h-[42px] items-center justify-center rounded-[8px] text-[15px] font-medium transition-colors md:text-[17px] ${
+                  isActive ? "bg-[#f15a48] font-bold text-white" : "text-[#444] hover:bg-[#fafafa]"
                 }`}
               >
                 {label}
@@ -82,7 +80,7 @@ function MarketingPage() {
         </div>
 
         {/* ── Main two-panel layout ────────────────────────────── */}
-        <div className="grid min-h-0 flex-1 grid-cols-[35%_1fr] gap-[22px]" dir="ltr">
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-[35%_1fr] lg:gap-5" dir="ltr">
           {/* Left: gauge panel */}
           <aside
             className="flex flex-col items-center justify-center gap-[16px] overflow-hidden rounded-[10px] border border-[#e7e7e7] bg-white px-6 py-6 text-center shadow-[0_7px_18px_rgba(0,0,0,0.06)]"
@@ -98,18 +96,20 @@ function MarketingPage() {
 
           {/* Right: tasks panel */}
           <section
-            className="flex min-h-0 flex-col overflow-hidden rounded-[10px] border border-[#e7e7e7] bg-white shadow-[0_7px_18px_rgba(0,0,0,0.06)]"
+            className="flex flex-col overflow-hidden rounded-[10px] border border-[#e7e7e7] bg-white shadow-[0_7px_18px_rgba(0,0,0,0.06)]"
             dir="rtl"
           >
             {/* Header */}
-            <div className="flex shrink-0 items-start justify-between p-[18px] pb-[12px]">
+            <div className="flex flex-col items-stretch gap-3 p-[18px] pb-[12px] sm:flex-row sm:items-start sm:justify-between">
               <div className="text-right">
-                <h2 className="text-[22px] font-bold leading-snug text-[#222]">{title}</h2>
+                <h2 className="text-[20px] font-bold leading-snug text-[#222] md:text-[22px]">
+                  {title}
+                </h2>
                 <p className="mt-0.5 text-[13px] text-[#666]">{subtitle}</p>
               </div>
               <button
                 onClick={() => setOpen(true)}
-                className="flex h-[48px] items-center gap-5 rounded-[10px] bg-[#ff5a49] px-3.5 text-[18px] font-normal text-[#0d0221] shadow-[0_6px_14px_rgba(241,90,72,0.35)]"
+                className="flex h-[48px] shrink-0 items-center gap-5 self-start rounded-[10px] bg-[#ff5a49] px-3.5 text-[18px] font-normal text-[#0d0221] shadow-[0_6px_14px_rgba(241,90,72,0.35)]"
                 dir="ltr"
               >
                 <span className="flex h-[34px] w-[34px] shrink-0 items-center justify-center rounded-[3px] border-2 border-[#0d0221]">
@@ -123,25 +123,25 @@ function MarketingPage() {
 
             {/* States */}
             {isLoading && (
-              <div className="flex flex-1 items-center justify-center">
+              <div className="flex h-[240px] items-center justify-center">
                 <Loader2 className="h-8 w-8 animate-spin text-[#00b6b5]" />
               </div>
             )}
             {isError && (
-              <div className="flex flex-1 items-center justify-center text-[16px] text-red-500">
+              <div className="flex h-[240px] items-center justify-center text-[16px] text-red-500">
                 שגיאה בטעינת הנתונים
               </div>
             )}
             {!isLoading && !isError && goals.length === 0 && (
-              <div className="flex flex-1 items-center justify-center text-[16px] text-[#aaa]">
+              <div className="flex h-[240px] items-center justify-center text-[16px] text-[#aaa]">
                 אין משימות בקטגוריה זו עדיין
               </div>
             )}
 
             {/* Goal grid */}
             {!isLoading && !isError && goals.length > 0 && (
-              <div className="min-h-0 flex-1 overflow-y-auto px-[18px] pb-[18px]">
-                <div className="grid grid-cols-2 gap-x-[14px] gap-y-[10px]">
+              <div className="max-h-[70vh] overflow-y-auto px-[18px] pb-[18px]">
+                <div className="grid grid-cols-1 gap-x-[14px] gap-y-[10px] sm:grid-cols-2">
                   {goals.map((goal) => (
                     <GoalCard
                       key={goal.id}

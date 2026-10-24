@@ -14,6 +14,7 @@ export type Database = {
           id: string;
           interested_in: string | null;
           name: string;
+          next_task: string | null;
           notes: string | null;
           phone: string | null;
           proposed_price: string | null;
@@ -30,6 +31,7 @@ export type Database = {
           id?: string;
           interested_in?: string | null;
           name: string;
+          next_task?: string | null;
           notes?: string | null;
           phone?: string | null;
           proposed_price?: string | null;
@@ -46,6 +48,7 @@ export type Database = {
           id?: string;
           interested_in?: string | null;
           name?: string;
+          next_task?: string | null;
           notes?: string | null;
           phone?: string | null;
           proposed_price?: string | null;

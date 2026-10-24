@@ -71,15 +71,14 @@
   --panel: #ffffff;
 }
 
-/* Global custom scrollbar - orange thumb on transparent track */
 * {
   scrollbar-width: thin;
   scrollbar-color: #f15a48 transparent;
 }
 
 *::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 8px;
+  height: 8px;
 }
 
 *::-webkit-scrollbar-track {
@@ -96,8 +95,38 @@
   background: #d94e3e;
 }
 
+/* Sidebar nav — every item has the same box (size, padding, weight), so hover
+   only changes colors and nothing shifts. The active item is a white pill that
+   extends past the sidebar's left edge into the canvas gap, as in the Figma design. */
+.nav-link,
+.nav-active-pill {
+  display: block;
+  width: calc(100% + 18px);
+  margin-left: -18px;
+  padding: 8px 14px 8px 18px;
+  border-radius: 10px;
+  transition:
+    background-color 150ms ease-out,
+    box-shadow 150ms ease-out;
+}
+.nav-link {
+  font-weight: 400;
+}
+a.nav-link:hover,
+a.nav-link:focus-visible {
+  background: rgba(255, 255, 255, 0.28);
+  outline: none;
+}
+.nav-active-pill {
+  background: #fff;
+  font-weight: 700;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.15);
+}
+
 @layer base {
-  * { border-color: var(--color-border); }
+  * {
+    border-color: var(--color-border);
+  }
   button:not(:disabled),
   [role="button"]:not([aria-disabled="true"]),
   input[type="checkbox"]:not(:disabled),
@@ -106,17 +135,10 @@
   summary {
     cursor: pointer;
   }
-  html, body {
+  html,
+  body {
     direction: rtl;
-    height: 100%;
-    overflow: hidden;
-  }
-  html.dashboard-compact,
-  html.dashboard-compact body {
-    height: auto;
     min-height: 100%;
-    overflow-x: hidden;
-    overflow-y: auto;
   }
   body {
     background-color: var(--teal);
@@ -124,33 +146,4 @@
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
   }
-}
-
-.dashboard-viewport {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100vw;
-  height: 100vh;
-  height: 100dvh;
-  overflow: hidden;
-  background-color: var(--teal);
-}
-
-.dashboard-viewport--compact {
-  align-items: flex-start;
-  justify-content: center;
-  height: auto;
-  min-height: 100dvh;
-  overflow-x: hidden;
-  overflow-y: visible;
-  padding-bottom: 24px;
-}
-
-.page-fill {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  min-height: 0;
-  overflow: hidden;
 }

@@ -1,13 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
-import plusIcon from "@/assets/figma/plus-icon.svg";
-import taskRadioDanger from "@/assets/figma/task-radio-danger.svg";
-import taskEdit from "@/assets/figma/task-edit.svg";
-import taskDelete from "@/assets/figma/task-delete.svg";
-import taskFooterIcons from "@/assets/figma/task-footer-icons.svg";
-import taskMore from "@/assets/figma/task-more.svg";
-import gaugeSvg from "@/assets/gauge-65.svg";
-import type { CSSProperties } from "react";
+import { Plus, Pencil, Trash2, Loader2 } from "lucide-react";
 import { useState } from "react";
+import gaugeSvg from "@/assets/gauge-65.svg";
 import { ConfirmDialog } from "@/components/ConfirmDialog";
 import { LeadActionsBar } from "@/components/LeadActionsBar";
 import { useDashboardSummary } from "@/hooks/use-dashboard";
@@ -19,6 +13,7 @@ import {
 import { useDeleteLead, useUpdateLead } from "@/hooks/use-leads";
 import { useAuth } from "@/lib/auth/auth-context";
 import { requireAuth } from "@/lib/auth/route-guards";
+import { formatCurrency, formatHebrewDate, currentMonthName } from "@/lib/format";
 import type {
   Lead,
   LeadUpdate,
@@ -38,8 +33,6 @@ export const Route = createFileRoute("/")({
   component: LeadsDashboard,
 });
 
-const DESIGN_WIDTH = 1650;
-const DESIGN_HEIGHT = 870;
 const marketingCategories: MarketingCategory[] = [
   "מכירות",
   "חשיפה",
@@ -56,62 +49,6 @@ type DashboardTask = {
   weekly_task: string | null;
 };
 
-function figmaRect(left: number, top: number, width: number, height: number): CSSProperties {
-  return {
-    left: `${(left / DESIGN_WIDTH) * 100}%`,
-    top: `${(top / DESIGN_HEIGHT) * 100}%`,
-    width: `${(width / DESIGN_WIDTH) * 100}%`,
-    height: `${(height / DESIGN_HEIGHT) * 100}%`,
-  };
-}
-
-const statColumns = [
-  {
-    left: 930,
-    top: { label: 'שתפ"ים', category: 'שתפ"ם', sub: "הפניות ושיתופי פעולה", color: "#f15a48" },
-    bottom: {
-      label: "בניית תשתיות",
-      category: "בניית תשתיות",
-      sub: "פיתוח כלים ותהליכים שיווקיים",
-      color: "#008f15",
-    },
-  },
-  {
-    left: 1100,
-    top: {
-      label: "חשיפה",
-      category: "חשיפה",
-      sub: "פרונטלית / פרינטית / דיגיטלית",
-      color: "#ff9914",
-    },
-    bottom: {
-      label: "המלצות",
-      category: "המלצות",
-      sub: "איסוף המלצות מלקוחות מרוצים",
-      color: "#ff9914",
-    },
-  },
-  {
-    left: 1270,
-    top: {
-      label: "מכירות",
-      category: "מכירות",
-      sub: "מכירות יזומות\nמול הלקוח הפוטנציאלי",
-      color: "#008f15",
-    },
-    bottom: {
-      label: "שימור",
-      category: "שימור",
-      sub: "מתנות ומעקב שביעות\nרצון לקוח",
-      color: "#f15a48",
-    },
-  },
-] satisfies {
-  left: number;
-  top: StatDefinition;
-  bottom: StatDefinition;
-}[];
-
 type StatDefinition = {
   label: string;
   category: MarketingCategory;
@@ -119,18 +56,24 @@ type StatDefinition = {
   color: string;
 };
 
-function formatDate(date: string | null | undefined) {
-  if (!date) return "";
-  return new Intl.DateTimeFormat("he-IL").format(new Date(date));
-}
-
-function formatCurrency(value: number) {
-  return new Intl.NumberFormat("he-IL").format(value);
-}
-
-function currentMonthName() {
-  return new Intl.DateTimeFormat("he-IL", { month: "long" }).format(new Date());
-}
+const statCards: StatDefinition[] = [
+  {
+    label: "מכירות",
+    category: "מכירות",
+    sub: "מכירות יזומות מול הלקוח הפוטנציאלי",
+    color: "#008f15",
+  },
+  { label: "חשיפה", category: "חשיפה", sub: "פרונטלית / פרינטית / דיגיטלית", color: "#ff9914" },
+  { label: 'שתפ"ים', category: 'שתפ"ם', sub: "הפניות ושיתופי פעולה", color: "#f15a48" },
+  { label: "שימור", category: "שימור", sub: "מתנות ומעקב שביעות רצון לקוח", color: "#f15a48" },
+  { label: "המלצות", category: "המלצות", sub: "איסוף המלצות מלקוחות מרוצים", color: "#ff9914" },
+  {
+    label: "בניית תשתיות",
+    category: "בניית תשתיות",
+    sub: "פיתוח כלים ותהליכים שיווקיים",
+    color: "#008f15",
+  },
+];
 
 function LeadsDashboard() {
   const { user } = useAuth();
@@ -155,41 +98,61 @@ function LeadsDashboard() {
   const monthlyLeads = summary?.monthlyLeads ?? [];
   const monthlyRevenue = summary?.monthlyRevenue ?? 0;
   const monthlyTarget = summary?.profile?.monthly_salary_target ?? 0;
-  const isLoading = summaryLoading;
-  const isError = summaryError;
 
   return (
     <>
-      <LeadsSection
-        leads={negotiationLeads}
-        isLoading={summaryLoading}
-        isError={summaryError}
-        onEditLead={setEditingLead}
-        onDeleteLead={setDeletingLead}
-      />
-      <TasksSection
-        tasks={summary?.weeklyTasks ?? []}
-        isLoading={summaryLoading}
-        isError={summaryError}
-        onAddTask={() => setTaskModal({ mode: "add" })}
-        onEditTask={(task) => setTaskModal({ mode: "edit", task })}
-        onDeleteTask={setDeletingTask}
-        onToggleTaskComplete={(task) =>
-          updateTask.mutate({ goalId: task.id, updates: { status: "completed" } })
-        }
-      />
-      <RevenueSection revenue={monthlyRevenue} target={monthlyTarget} />
-      <MonthlyLeadsSection
-        leads={monthlyLeads}
-        total={summary?.leadsThisMonth ?? monthlyLeads.length}
-        isLoading={summaryLoading}
-        isError={summaryError}
-      />
-      <StatsSection
-        categoryGoals={summary?.categoryGoals ?? {}}
-        isLoading={isLoading}
-        isError={isError}
-      />
+      {/*
+        Desktop (lg+): full viewport height, no page scroll — 2 rows.
+        Mobile/tablet: natural flow, single column.
+      */}
+      {/* Figma layout — in RTL col-start-1 is rightmost.
+         Row 1: Leads (right, wide) | Tasks (middle-left).
+         Row 2: Revenue (right) | Monthly leads (middle) | Stats grid (left).
+         The daily tip badge lives in DashboardShell (floats in top-left corner). */}
+      <div className="flex flex-col gap-3 lg:h-full lg:min-h-0 lg:grid lg:grid-cols-12 lg:grid-rows-[minmax(0,1.15fr)_minmax(0,1fr)] lg:gap-4 lg:pb-4 lg:pl-[110px]">
+        <div className="lg:col-start-1 lg:col-span-7 lg:row-start-1">
+          <LeadsSection
+            leads={negotiationLeads}
+            isLoading={summaryLoading}
+            isError={summaryError}
+            onEditLead={setEditingLead}
+            onDeleteLead={setDeletingLead}
+          />
+        </div>
+        <div className="lg:col-start-8 lg:col-span-5 lg:row-start-1">
+          <TasksSection
+            tasks={summary?.weeklyTasks ?? []}
+            isLoading={summaryLoading}
+            isError={summaryError}
+            onAddTask={() => setTaskModal({ mode: "add" })}
+            onEditTask={(task) => setTaskModal({ mode: "edit", task })}
+            onDeleteTask={setDeletingTask}
+            onToggleTaskComplete={(task) =>
+              updateTask.mutate({ goalId: task.id, updates: { status: "completed" } })
+            }
+          />
+        </div>
+
+        <div className="lg:col-start-1 lg:col-span-4 lg:row-start-2">
+          <RevenueSection revenue={monthlyRevenue} target={monthlyTarget} />
+        </div>
+        <div className="lg:col-start-5 lg:col-span-3 lg:row-start-2">
+          <MonthlyLeadsSection
+            leads={monthlyLeads}
+            total={summary?.leadsThisMonth ?? monthlyLeads.length}
+            isLoading={summaryLoading}
+            isError={summaryError}
+          />
+        </div>
+        <div className="lg:col-start-8 lg:col-span-5 lg:row-start-2">
+          <StatsSection
+            categoryGoals={summary?.categoryGoals ?? {}}
+            isLoading={summaryLoading}
+            isError={summaryError}
+          />
+        </div>
+      </div>
+
       {editingLead && (
         <LeadEditModal
           lead={editingLead}
@@ -240,23 +203,60 @@ function LeadsDashboard() {
   );
 }
 
-function TealHeader({
-  left,
-  top,
-  width,
+// Card fills its grid slot; header stays put; body scrolls when overflowing.
+function Card({
+  title,
+  headerExtra,
   children,
+  className,
+  bodyClassName,
 }: {
-  left: number;
-  top: number;
-  width: number;
+  title?: string;
+  headerExtra?: React.ReactNode;
   children: React.ReactNode;
+  className?: string;
+  bodyClassName?: string;
+}) {
+  return (
+    <section
+      className={`flex h-full min-h-[220px] flex-col overflow-hidden rounded-[12px] bg-white shadow-[0_10px_20px_rgba(0,0,0,0.1)] ${className ?? ""}`}
+    >
+      {title && (
+        <div className="relative flex h-[32px] shrink-0 items-center justify-center bg-[#00b6b5] px-4">
+          <h3 className="text-[15px] font-bold leading-none text-[#0d0221] md:text-[16px]">
+            {title}
+          </h3>
+          {headerExtra && (
+            <div className="absolute left-3 top-1/2 -translate-y-1/2">{headerExtra}</div>
+          )}
+        </div>
+      )}
+      <div className={`flex min-h-0 flex-1 flex-col ${bodyClassName ?? "p-3"}`}>{children}</div>
+    </section>
+  );
+}
+
+function EmptyState({
+  children,
+  tone = "neutral",
+}: {
+  children: React.ReactNode;
+  tone?: "neutral" | "error";
 }) {
   return (
     <div
-      className="absolute flex h-[30px] items-center justify-center rounded-t-[10px] bg-[#00b6b5] shadow-[0_10px_10px_rgba(0,0,0,0.1)]"
-      style={figmaRect(left, top, width, 30)}
+      className={`flex flex-1 items-center justify-center text-center text-[14px] ${tone === "error" ? "text-[#f15a48]" : "text-[#0d0221]/70"}`}
     >
-      <h3 className="text-[18px] font-bold leading-[25px] text-[#0d0221]">{children}</h3>
+      {children}
+    </div>
+  );
+}
+
+function LoadingState({ label }: { label: string }) {
+  return (
+    <div className="flex flex-1 items-center justify-center text-[14px] text-[#0d0221]/70">
+      <Loader2 className="ml-2 h-4 w-4 animate-spin" />
+      {label}
     </div>
   );
 }
@@ -275,73 +275,69 @@ function LeadsSection({
   onDeleteLead: (lead: Lead) => void;
 }) {
   return (
-    <section
-      className="absolute overflow-hidden rounded-[10px] bg-white shadow-[0_10px_20px_rgba(0,182,181,0.3)]"
-      style={figmaRect(90, 180.5, 810, 360)}
+    <Card
+      title='לידים במו"מ'
+      className="shadow-[0_10px_20px_rgba(0,182,181,0.3)]"
+      bodyClassName="p-3 md:p-4"
     >
-      <div className="flex h-[30px] items-center justify-center rounded-t-[10px] bg-[#00b6b5] shadow-[0_10px_10px_rgba(0,0,0,0.1)]">
-        <h3 className="text-[18px] font-bold leading-[25px] text-[#0d0221]">לידים במו&quot;מ</h3>
-      </div>
-
-      <div className="h-[330px] overflow-y-auto px-[60px] py-[30px]" dir="rtl">
-        {isLoading && (
-          <div className="flex h-full items-center justify-center text-center text-[18px] leading-[25px] text-[#0d0221]">
-            טוען לידים...
-          </div>
-        )}
-        {isError && (
-          <div className="flex h-full items-center justify-center text-center text-[18px] leading-[25px] text-[#f15a48]">
-            שגיאה בטעינת הלידים
-          </div>
-        )}
+      <div className="min-h-0 flex-1 overflow-y-auto pl-1 pr-1" dir="rtl">
+        {isLoading && <LoadingState label="טוען לידים..." />}
+        {isError && <EmptyState tone="error">שגיאה בטעינת הלידים</EmptyState>}
         {!isLoading && !isError && leads.length === 0 && (
-          <div className="flex h-full items-center justify-center text-center text-[18px] leading-[25px] text-[#0d0221]">
-            אין כרגע לידים במו&quot;מ
-          </div>
+          <EmptyState>אין כרגע לידים במו&quot;מ</EmptyState>
         )}
-
         {!isLoading && !isError && leads.length > 0 && (
-          <div className="flex min-h-full flex-col gap-[14.99px]">
+          <div className="flex flex-col gap-2">
             {leads.map((lead, i) => (
-              <div
+              <LeadRow
                 key={lead.id}
-                className="relative flex h-[39.13px] shrink-0 items-center rounded-[5px] bg-white"
-                style={{
-                  boxShadow:
-                    i === 0 ? "0 10px 20px rgba(241,90,72,0.2)" : "0 10px 20px rgba(0,0,0,0.1)",
-                }}
-                dir="ltr"
-              >
-                <div className="absolute left-[30px] top-1/2 -translate-y-1/2">
-                  <LeadActionsBar
-                    phone={lead.phone}
-                    email={lead.email}
-                    onEdit={() => onEditLead(lead)}
-                    onDelete={() => onDeleteLead(lead)}
-                    className="h-[24.357px] w-[92.269px]"
-                  />
-                </div>
-
-                <div
-                  className="absolute left-[155px] right-[30px] top-1/2 grid h-[24.783px] -translate-y-1/2 grid-cols-[120px_1px_90px_1px_115px_1px_80px_1px_90px] items-center text-[18px] leading-[25px] text-[#0d0221]"
-                  dir="rtl"
-                >
-                  <div className="min-w-0 truncate text-right font-bold">{lead.name}</div>
-                  <div className="h-[19px] w-px bg-[#d9d9d9]" />
-                  <div className="min-w-0 truncate text-right">{lead.source}</div>
-                  <div className="h-[19px] w-px bg-[#d9d9d9]" />
-                  <div className="min-w-0 truncate text-right">{lead.interested_in}</div>
-                  <div className="h-[19px] w-px bg-[#d9d9d9]" />
-                  <div className="min-w-0 truncate text-right">{lead.proposed_price}</div>
-                  <div className="h-[19px] w-px bg-[#d9d9d9]" />
-                  <div className="min-w-0 truncate text-right">{formatDate(lead.created_at)}</div>
-                </div>
-              </div>
+                lead={lead}
+                highlight={i === 0}
+                onEdit={() => onEditLead(lead)}
+                onDelete={() => onDeleteLead(lead)}
+              />
             ))}
           </div>
         )}
       </div>
-    </section>
+    </Card>
+  );
+}
+
+function LeadRow({
+  lead,
+  highlight,
+  onEdit,
+  onDelete,
+}: {
+  lead: Lead;
+  highlight: boolean;
+  onEdit: () => void;
+  onDelete: () => void;
+}) {
+  return (
+    <div
+      className="flex items-center gap-3 rounded-[8px] bg-white p-2.5"
+      style={{
+        boxShadow: highlight ? "0 6px 14px rgba(241,90,72,0.2)" : "0 6px 14px rgba(0,0,0,0.08)",
+      }}
+      dir="rtl"
+    >
+      <div className="min-w-0 flex-1 truncate text-right">
+        <div className="flex items-baseline justify-between gap-2">
+          <span className="truncate text-[15px] font-bold text-[#0d0221]">{lead.name}</span>
+          <span className="shrink-0 text-[12px] text-[#0d0221]/60">
+            {formatHebrewDate(lead.created_at)}
+          </span>
+        </div>
+        <div className="mt-0.5 truncate text-[12px] text-[#0d0221]/80">
+          {[lead.source, lead.interested_in, lead.proposed_price].filter(Boolean).join(" · ")}
+        </div>
+      </div>
+      <div className="shrink-0" dir="ltr">
+        <LeadActionsBar lead={lead} onEdit={onEdit} onDelete={onDelete} />
+      </div>
+    </div>
   );
 }
 
@@ -363,77 +359,64 @@ function TasksSection({
   onToggleTaskComplete: (task: DashboardTask) => void;
 }) {
   return (
-    <section
-      className="absolute overflow-hidden rounded-[10px] bg-white shadow-[0_10px_20px_rgba(0,0,0,0.1)]"
-      style={figmaRect(930, 180.5, 510, 300)}
+    <Card
+      title="משימות שבועיות"
+      headerExtra={
+        <button
+          type="button"
+          onClick={onAddTask}
+          className="flex h-6 w-9 items-center justify-center rounded-full bg-[#f15a48] text-white shadow"
+          aria-label="הוספת משימה שבועית"
+        >
+          <Plus className="h-4 w-4" strokeWidth={2.4} />
+        </button>
+      }
+      bodyClassName="p-3"
     >
-      <div className="flex h-[30px] items-center justify-center rounded-t-[10px] bg-[#00b6b5] shadow-[0_10px_10px_rgba(0,0,0,0.1)]">
-        <h3 className="text-[18px] font-bold leading-[25px] text-[#0d0221]">משימות שבועיות</h3>
-      </div>
-      <button
-        type="button"
-        onClick={onAddTask}
-        className="absolute left-[50px] top-[5.5px] flex h-[19px] w-[29px] items-center justify-center rounded-[10px] bg-[#f15a48] shadow-[0_10px_10px_rgba(0,0,0,0.1)]"
-        aria-label="הוספת משימה שבועית"
-      >
-        <img src={plusIcon} alt="" className="h-[13px] w-[15px]" />
-      </button>
-
-      <div className="h-[230px] overflow-y-auto px-[60px] pb-[12px] pt-[10px]" dir="rtl">
-        {isLoading && (
-          <div className="flex h-full items-center justify-center text-center text-[18px] leading-[25px] text-[#0d0221]">
-            טוען משימות...
-          </div>
-        )}
-        {isError && (
-          <div className="flex h-full items-center justify-center text-center text-[18px] leading-[25px] text-[#f15a48]">
-            שגיאה בטעינת המשימות
-          </div>
-        )}
+      <div className="min-h-0 flex-1 overflow-y-auto pl-1 pr-1" dir="rtl">
+        {isLoading && <LoadingState label="טוען משימות..." />}
+        {isError && <EmptyState tone="error">שגיאה בטעינת המשימות</EmptyState>}
         {!isLoading && !isError && tasks.length === 0 && (
-          <div className="flex h-full items-center justify-center text-center text-[18px] leading-[25px] text-[#0d0221]">
-            אין משימות שבועיות פעילות
-          </div>
+          <EmptyState>אין משימות שבועיות פעילות</EmptyState>
         )}
-
         {!isLoading && !isError && tasks.length > 0 && (
-          <div className="flex min-h-full flex-col gap-[11px]">
+          <div className="flex flex-col gap-2">
             {tasks.map((task) => (
               <div
                 key={task.id}
-                className="relative h-[42px] shrink-0 rounded-[8px] bg-white shadow-[0_10px_20px_rgba(0,0,0,0.08)]"
+                className="flex items-center gap-3 rounded-[8px] bg-white p-2.5 shadow-[0_6px_14px_rgba(0,0,0,0.08)]"
                 dir="rtl"
               >
                 <button
                   type="button"
                   onClick={() => onToggleTaskComplete(task)}
-                  className="absolute right-[18px] top-[7px] size-[16px]"
+                  className="h-5 w-5 shrink-0 rounded-full border-2 border-[#f15a48] transition-colors hover:bg-[#f15a48]/10"
                   aria-label="סימון משימה כהושלמה"
-                >
-                  <img src={taskRadioDanger} alt="" className="size-[16px]" />
-                </button>
-                <div className="absolute left-[82px] right-[48px] top-[4px] truncate text-right text-[18px] leading-[25px] text-[#f15a48]">
-                  {task.weekly_task || task.title}
+                />
+                <div className="min-w-0 flex-1 text-right">
+                  <div className="truncate text-[14px] font-medium leading-tight text-[#f15a48]">
+                    {task.weekly_task || task.title}
+                  </div>
+                  <div className="mt-0.5 truncate text-[11px] text-[#f15a48]/80">
+                    {task.category}
+                  </div>
                 </div>
-                <div className="absolute bottom-[3px] left-[82px] right-[48px] truncate text-right text-[14px] leading-[20px] text-[#f15a48]">
-                  {task.category}
-                </div>
-                <div className="absolute bottom-[6px] left-[18px] flex w-[46px] items-center justify-start gap-[16px]">
+                <div className="flex shrink-0 items-center gap-2 text-[#f15a48]">
                   <button
                     type="button"
                     onClick={() => onEditTask(task)}
-                    className="flex size-[14px] items-center justify-center"
                     aria-label="עריכת משימה"
+                    className="hover:opacity-70"
                   >
-                    <img src={taskEdit} alt="" className="size-[11px]" />
+                    <Pencil className="h-3.5 w-3.5" />
                   </button>
                   <button
                     type="button"
                     onClick={() => onDeleteTask(task)}
-                    className="flex size-[14px] items-center justify-center"
                     aria-label="מחיקת משימה"
+                    className="hover:opacity-70"
                   >
-                    <img src={taskDelete} alt="" className="h-[11px] w-[9.533px]" />
+                    <Trash2 className="h-3.5 w-3.5" />
                   </button>
                 </div>
               </div>
@@ -441,26 +424,131 @@ function TasksSection({
           </div>
         )}
       </div>
-
-      <img
-        src={taskFooterIcons}
-        alt=""
-        className="absolute bottom-[17px] left-[60px] h-[12.437px] w-[110.651px]"
-      />
-      <img
-        src={taskMore}
-        alt=""
-        className="absolute bottom-[14px] left-[420px] h-[18px] w-[24px]"
-      />
-      <div
-        className="absolute bottom-[7px] left-[210px] w-[210px] text-right text-[18px] leading-[25px] text-black"
-        dir="rtl"
-      >
-        ...
-      </div>
-    </section>
+    </Card>
   );
 }
+
+function RevenueSection({ revenue, target }: { revenue: number; target: number }) {
+  const percentage = target > 0 ? Math.min(100, Math.round((revenue / target) * 100)) : 0;
+
+  return (
+    <Card title={`סך הכנסות לחודש ${currentMonthName()}`} bodyClassName="p-4">
+      <div className="flex flex-1 items-center justify-between gap-3">
+        <div className="min-w-0 flex-1 text-right" dir="rtl">
+          <div className="truncate text-[26px] font-bold leading-tight text-[#f15a48] md:text-[36px]">
+            {formatCurrency(revenue)} ש&quot;ח
+          </div>
+          <div className="text-[12px] leading-tight text-[#0d0221] md:text-[15px]">
+            מתוך יעד של {formatCurrency(target)} ש&quot;ח
+          </div>
+        </div>
+        <div className="relative flex h-[100px] w-[100px] shrink-0 items-center justify-center md:h-[120px] md:w-[120px]">
+          <img src={gaugeSvg} alt={`${percentage}%`} className="h-full w-full" />
+        </div>
+      </div>
+    </Card>
+  );
+}
+
+function MonthlyLeadsSection({
+  leads,
+  total,
+  isLoading,
+  isError,
+}: {
+  leads: Lead[];
+  total: number;
+  isLoading: boolean;
+  isError: boolean;
+}) {
+  return (
+    <Card title="לידים החודש" bodyClassName="p-3">
+      <div className="min-h-0 flex-1 overflow-y-auto" dir="rtl">
+        {isLoading && <LoadingState label="טוען..." />}
+        {isError && <EmptyState tone="error">שגיאה בטעינת לידים</EmptyState>}
+        {!isLoading && !isError && leads.length === 0 && (
+          <EmptyState>אין לידים חדשים החודש</EmptyState>
+        )}
+        {!isLoading && !isError && leads.length > 0 && (
+          <div className="flex flex-col gap-1.5">
+            {leads.map((lead) => (
+              <div
+                key={lead.id}
+                className="flex items-center justify-between gap-2 rounded-[6px] bg-white p-2 text-[12px] text-[#0d0221] shadow-[0_4px_10px_rgba(0,0,0,0.06)]"
+              >
+                <span className="min-w-0 flex-1 truncate text-right font-bold">{lead.name}</span>
+                <span className="shrink-0 text-[11px] text-[#0d0221]/70">
+                  {lead.proposed_price || ""}
+                </span>
+              </div>
+            ))}
+            {total > leads.length && (
+              <div className="text-center text-[12px] font-bold text-[#f15a48]">
+                ועוד {total - leads.length} לידים החודש
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </Card>
+  );
+}
+
+function StatsSection({
+  categoryGoals,
+  isLoading,
+  isError,
+}: {
+  categoryGoals: Record<string, number>;
+  isLoading: boolean;
+  isError: boolean;
+}) {
+  if (isLoading) {
+    return (
+      <div className="flex h-full min-h-[220px] items-center justify-center rounded-[12px] bg-white shadow-[0_10px_20px_rgba(0,0,0,0.1)]">
+        <Loader2 className="ml-2 h-5 w-5 animate-spin text-[#0d0221]" />
+        <span className="text-[14px] text-[#0d0221]">טוען נתוני שיווק...</span>
+      </div>
+    );
+  }
+  if (isError) {
+    return (
+      <div className="flex h-full min-h-[220px] items-center justify-center rounded-[12px] bg-white text-[14px] text-[#f15a48] shadow-[0_10px_20px_rgba(0,0,0,0.1)]">
+        שגיאה בטעינת נתוני שיווק
+      </div>
+    );
+  }
+  return (
+    <div className="grid h-full min-h-[220px] grid-cols-3 grid-rows-2 gap-2">
+      {statCards.map((stat) => (
+        <StatCard key={stat.label} stat={stat} value={categoryGoals[stat.category] ?? 0} />
+      ))}
+    </div>
+  );
+}
+
+function StatCard({ stat, value }: { stat: StatDefinition; value: number }) {
+  return (
+    <div className="flex flex-col overflow-hidden rounded-[10px] bg-white shadow-[0_6px_14px_rgba(0,0,0,0.1)]">
+      <div className="flex h-[26px] shrink-0 items-center justify-center bg-[#00b6b5]">
+        <span className="text-[13px] font-bold text-[#0d0221] md:text-[14px]">{stat.label}</span>
+      </div>
+      <div className="flex flex-1 flex-col items-center justify-around gap-1 p-2">
+        <p className="line-clamp-2 text-center text-[10px] leading-tight text-[#0d0221]" dir="rtl">
+          {stat.sub}
+        </p>
+        <div
+          className="text-[28px] font-extrabold leading-none md:text-[32px]"
+          style={{ color: stat.color }}
+        >
+          {value}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ── Modals ───────────────────────────────────────────────────────
 
 function LeadEditModal({
   lead,
@@ -505,16 +593,18 @@ function LeadEditModal({
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60"
+      className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-black/60 p-4"
       onClick={onClose}
       dir="rtl"
     >
       <div
-        className="w-[92vw] max-w-[900px] rounded-[14px] bg-white p-8 shadow-2xl"
+        className="w-full max-w-[900px] rounded-[14px] bg-white p-6 shadow-2xl md:p-8"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="mb-6 text-center text-[22px] font-bold text-[#00b6b5]">עריכת ליד</h2>
-        <div className="grid grid-cols-3 gap-3">
+        <h2 className="mb-6 text-center text-[20px] font-bold text-[#00b6b5] md:text-[22px]">
+          עריכת ליד
+        </h2>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
           <DashboardField label="שם *" value={name} onChange={setName} />
           <DashboardField label="טלפון" value={phone} onChange={setPhone} />
           <DashboardField label="מייל" value={email} onChange={setEmail} />
@@ -572,18 +662,18 @@ function TaskModal({
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60"
+      className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-black/60 p-4"
       onClick={onClose}
       dir="rtl"
     >
       <div
-        className="w-[92vw] max-w-[760px] rounded-[14px] bg-white p-8 shadow-2xl"
+        className="w-full max-w-[760px] rounded-[14px] bg-white p-6 shadow-2xl md:p-8"
         onClick={(e) => e.stopPropagation()}
       >
-        <h2 className="mb-6 text-center text-[22px] font-bold text-[#00b6b5]">
+        <h2 className="mb-6 text-center text-[20px] font-bold text-[#00b6b5] md:text-[22px]">
           {mode === "add" ? "הוספת משימה שבועית" : "עריכת משימה שבועית"}
         </h2>
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
           <DashboardField label="כותרת *" value={title} onChange={setTitle} />
           <label className="overflow-hidden rounded-[10px] border border-[#eee] bg-white">
             <span className="block bg-[#00b6b5] py-2 text-center text-[14px] font-bold text-white">
@@ -601,7 +691,7 @@ function TaskModal({
               ))}
             </select>
           </label>
-          <div className="col-span-2">
+          <div className="sm:col-span-2">
             <DashboardField label="משימה שבועית" value={weeklyTask} onChange={setWeeklyTask} />
           </div>
         </div>
@@ -652,7 +742,7 @@ function ModalActions({
   onSave: () => void;
 }) {
   return (
-    <div className="mt-7 flex items-center gap-3" dir="ltr">
+    <div className="mt-7 flex items-center justify-end gap-3" dir="ltr">
       <button
         type="button"
         onClick={onCancel}
@@ -669,188 +759,5 @@ function ModalActions({
         {saving ? "שומר..." : saveLabel}
       </button>
     </div>
-  );
-}
-
-function RevenueSection({ revenue, target }: { revenue: number; target: number }) {
-  const percentage = target > 0 ? Math.min(100, Math.round((revenue / target) * 100)) : 0;
-
-  return (
-    <>
-      <div
-        className="absolute rounded-[10px] bg-white shadow-[0_10px_20px_rgba(0,0,0,0.1)]"
-        style={figmaRect(90, 570.5, 450, 210)}
-      />
-      <TealHeader left={90} top={570.5} width={450}>
-        סך הכנסות לחודש <span className="underline decoration-[9.5%]">{currentMonthName()}</span>
-      </TealHeader>
-
-      <img
-        src={gaugeSvg}
-        alt={`${percentage}%`}
-        className="absolute"
-        style={figmaRect(117, 622, 109, 109)}
-      />
-      <div className="absolute text-right" style={figmaRect(255, 643, 245, 95)} dir="rtl">
-        <div className="text-[40px] font-bold leading-[46.665px] text-[#f15a48]">
-          {formatCurrency(revenue)} ש&quot;ח
-        </div>
-        <div className="text-[19.534px] leading-[46.665px] text-[#0d0221]">
-          מתוך יעד של {formatCurrency(target)} ש&quot;ח
-        </div>
-      </div>
-    </>
-  );
-}
-
-function MonthlyLeadsSection({
-  leads,
-  total,
-  isLoading,
-  isError,
-}: {
-  leads: Lead[];
-  total: number;
-  isLoading: boolean;
-  isError: boolean;
-}) {
-  const visibleLeads = leads.slice(0, 3);
-
-  return (
-    <section
-      className="absolute overflow-hidden rounded-[10px] bg-white shadow-[0_10px_20px_rgba(0,0,0,0.12)]"
-      style={figmaRect(570, 570.5, 330, 210)}
-      dir="rtl"
-    >
-      <div className="flex h-[31px] items-center justify-center bg-[#00b6b5] text-[18px] font-bold leading-none text-[#0d0221]">
-        לידים החודש
-      </div>
-      {isLoading && (
-        <div className="flex h-[calc(100%-31px)] items-center justify-center text-center text-[16px] leading-[25px] text-[#0d0221]">
-          טוען לידים...
-        </div>
-      )}
-      {isError && (
-        <div className="flex h-[calc(100%-31px)] items-center justify-center text-center text-[16px] leading-[25px] text-[#f15a48]">
-          שגיאה בטעינת לידים
-        </div>
-      )}
-      {!isLoading && !isError && leads.length === 0 && (
-        <div className="flex h-[calc(100%-31px)] items-center justify-center text-center text-[16px] leading-[25px] text-[#0d0221]">
-          אין לידים חדשים החודש
-        </div>
-      )}
-
-      {!isLoading && !isError && leads.length > 0 && (
-        <div className="flex flex-col gap-[14px] px-[22px] pt-[22px]">
-          {visibleLeads.map((lead) => (
-            <div
-              key={lead.id}
-              className="flex h-[39px] items-center justify-center rounded-[5px] bg-white px-[10px] text-[#0d0221] shadow-[0_10px_20px_rgba(0,0,0,0.1)]"
-            >
-              <div className="grid w-full grid-cols-[minmax(58px,1fr)_1px_minmax(52px,0.9fr)_1px_minmax(72px,1.1fr)_1px_minmax(48px,0.8fr)] items-center gap-[7px] text-[12px] leading-[15px]">
-                <span className="truncate text-right text-[18px] font-bold leading-[25px]">
-                  {lead.name}
-                </span>
-                <span className="h-[9px] w-px bg-[#d9d9d9]" />
-                <span className="truncate text-right">{lead.source || "מקור"}</span>
-                <span className="h-[9px] w-px bg-[#d9d9d9]" />
-                <span className="truncate text-right">{lead.proposed_price || "הצעת מחיר"}</span>
-                <span className="h-[9px] w-px bg-[#d9d9d9]" />
-                <span className="truncate text-right">{formatDate(lead.created_at)}</span>
-              </div>
-            </div>
-          ))}
-          {total > visibleLeads.length && (
-            <div className="text-center text-[13px] font-bold leading-[18px] text-[#f15a48]">
-              ועוד {total - visibleLeads.length} לידים החודש
-            </div>
-          )}
-        </div>
-      )}
-    </section>
-  );
-}
-
-function StatsColumn({
-  left,
-  top,
-  bottom,
-  categoryGoals,
-}: {
-  left: number;
-  top: StatDefinition;
-  bottom: StatDefinition;
-  categoryGoals: Record<string, number>;
-}) {
-  return (
-    <div
-      className="absolute overflow-hidden rounded-[10px] bg-white shadow-[0_10px_20px_rgba(0,0,0,0.1)]"
-      style={figmaRect(left, 510.5, 170, 270)}
-    >
-      {/* Top half */}
-      <div className="flex h-[22.5px] items-center justify-center rounded-t-[10px] bg-[#00b6b5]">
-        <span className="text-[18px] font-bold leading-[25px] text-[#0d0221]">{top.label}</span>
-      </div>
-      <div className="flex h-[112.5px] flex-col items-center justify-around px-1 py-1">
-        <p
-          className="w-full whitespace-pre-line text-center text-[12px] leading-[15px] text-[#0d0221]"
-          dir="rtl"
-        >
-          {top.sub}
-        </p>
-        <div className="text-[40px] font-extrabold leading-none" style={{ color: top.color }}>
-          {categoryGoals[top.category] ?? 0}
-        </div>
-      </div>
-
-      {/* Bottom half */}
-      <div className="flex h-[22.5px] w-full items-center justify-center bg-[#00b6b5] shadow-[0_10px_20px_rgba(0,0,0,0.1),0_-10px_20px_rgba(0,0,0,0.1)]">
-        <span className="text-[18px] font-bold leading-[25px] text-[#0d0221]">{bottom.label}</span>
-      </div>
-      <div className="flex h-[112.5px] flex-col items-center justify-around px-1 py-1">
-        <p
-          className="w-full whitespace-pre-line text-center text-[12px] leading-[15px] text-[#0d0221]"
-          dir="rtl"
-        >
-          {bottom.sub}
-        </p>
-        <div className="text-[40px] font-extrabold leading-none" style={{ color: bottom.color }}>
-          {categoryGoals[bottom.category] ?? 0}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function StatsSection({
-  categoryGoals,
-  isLoading,
-  isError,
-}: {
-  categoryGoals: Record<string, number>;
-  isLoading: boolean;
-  isError: boolean;
-}) {
-  return (
-    <>
-      {(isLoading || isError) && (
-        <div
-          className="absolute text-center text-[16px] leading-[22px]"
-          style={{ ...figmaRect(930, 486, 510, 22), color: isError ? "#f15a48" : "#0d0221" }}
-        >
-          {isError ? "שגיאה בטעינת נתוני שיווק" : "טוען נתוני שיווק..."}
-        </div>
-      )}
-      {statColumns.map((col) => (
-        <StatsColumn
-          key={col.top.label}
-          left={col.left}
-          top={col.top}
-          bottom={col.bottom}
-          categoryGoals={categoryGoals}
-        />
-      ))}
-    </>
   );
 }

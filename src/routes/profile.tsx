@@ -71,7 +71,7 @@ function ProfilePage() {
 
   if (isLoading) {
     return (
-      <div className="flex h-full items-center justify-center">
+      <div className="flex min-h-[300px] items-center justify-center">
         <div className="text-[18px] text-[#00b6b5]">טוען...</div>
       </div>
     );
@@ -79,8 +79,8 @@ function ProfilePage() {
 
   return (
     <>
-      <div className="flex h-full flex-col gap-[12px]">
-        <div className="flex shrink-0 flex-col items-center">
+      <div className="flex flex-col gap-4">
+        <div className="flex flex-col items-center">
           <div className="flex items-center" dir="ltr">
             <StepCircle n={3} status={stepStatus(3, step)} onClick={() => setStep(3)} />
             <StepLine completed={step > 2} />
@@ -88,7 +88,7 @@ function ProfilePage() {
             <StepLine completed={step > 1} />
             <StepCircle n={1} status={stepStatus(1, step)} onClick={() => setStep(1)} />
           </div>
-          <div className="mt-[8px] grid w-[460px] grid-cols-3 text-center" dir="ltr">
+          <div className="mt-[8px] grid w-full max-w-[460px] grid-cols-3 text-center" dir="ltr">
             {STEPS.slice()
               .reverse()
               .map(({ n, label }) => (
@@ -96,7 +96,7 @@ function ProfilePage() {
                   key={n}
                   type="button"
                   onClick={() => setStep(n)}
-                  className={`cursor-pointer text-[16px] font-medium transition-colors ${
+                  className={`cursor-pointer text-[14px] font-medium transition-colors sm:text-[16px] ${
                     step === n ? "text-[#f15a48]" : "text-[#222] hover:text-[#f15a48]"
                   }`}
                 >
@@ -106,7 +106,7 @@ function ProfilePage() {
           </div>
         </div>
 
-        <div className="min-h-0 flex-1">
+        <div>
           {step === 1 && (
             <IntroStep
               firstName={firstName}
@@ -132,7 +132,7 @@ function ProfilePage() {
           )}
         </div>
 
-        <div className="flex shrink-0 justify-center pb-2">
+        <div className="flex justify-center pb-2 pt-2">
           <button
             onClick={handleSave}
             disabled={upsert.isPending}
@@ -179,7 +179,7 @@ function IntroStep({
   setSlogan: (v: string) => void;
 }) {
   return (
-    <div className="grid h-full grid-cols-2 gap-x-[24px] gap-y-[16px]" dir="rtl">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-x-6 sm:gap-y-4" dir="rtl">
       <QACard
         question="אז מי את?"
         value={firstName}
@@ -214,7 +214,7 @@ function BusinessStep({ gc, setGc }: { gc: GoldenCircle; setGc: (v: GoldenCircle
   const update = (key: keyof GoldenCircle) => (val: string) => setGc({ ...gc, [key]: val });
 
   return (
-    <div className="grid h-full grid-cols-2 gap-x-[24px] gap-y-[16px]" dir="rtl">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-x-6 sm:gap-y-4" dir="rtl">
       <PromptCard
         question="למה בחרתי בתחום הזה?"
         prompt="מה הסיבה שבגללה בחרת לפעול בתחום הזה?"
@@ -261,7 +261,7 @@ function FinancialStep({
   setNewClients: (v: string) => void;
 }) {
   return (
-    <div className="grid h-full grid-cols-2 gap-x-[24px] gap-y-[16px]" dir="rtl">
+    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-x-6 sm:gap-y-4" dir="rtl">
       <PromptCard
         question="מה משכורת החודשית הממוצעת שלך?"
         prompt="הכניסי סכום בשקלים"
@@ -305,7 +305,11 @@ function StepCircle({
 }
 
 function StepLine({ completed }: { completed?: boolean }) {
-  return <div className={`h-[2px] w-[130px] ${completed ? "bg-[#00b6b5]" : "bg-[#bdbdbd]"}`} />;
+  return (
+    <div
+      className={`h-[2px] w-[60px] sm:w-[130px] ${completed ? "bg-[#00b6b5]" : "bg-[#bdbdbd]"}`}
+    />
+  );
 }
 
 const fieldBaseClass =
